@@ -53,7 +53,7 @@ const builder = new SchemaBuilder<{
     exposeDescriptions: true,
     onUnusedQuery: 'error',
   },
-  errorOptions: {
+  errors: {
     defaultTypes: [Error],
   },
 });
