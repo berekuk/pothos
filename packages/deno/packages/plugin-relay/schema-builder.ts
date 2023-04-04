@@ -26,61 +26,11 @@ import { NodeRef } from './node-ref.ts';
 import { ConnectionShape, GlobalIDShape, PageInfoShape } from './types.ts';
 import { capitalize, resolveNodes } from './utils/index.ts';
 const schemaBuilderProto = SchemaBuilder.prototype as PothosSchemaTypes.SchemaBuilder<SchemaTypes>;
-const pageInfoRefMap = new WeakMap<
-  PothosSchemaTypes.SchemaBuilder<SchemaTypes>,
-  ObjectRef<PageInfoShape>
->();
-const nodeInterfaceRefMap = new WeakMap<
-  PothosSchemaTypes.SchemaBuilder<SchemaTypes>,
-  InterfaceRef<{}>
->();
-export const connectionRefs = new WeakMap<
-  PothosSchemaTypes.SchemaBuilder<SchemaTypes>,
-  ObjectRef<ConnectionShape<SchemaTypes, unknown, boolean>>[]
->();
-export const globalConnectionFieldsMap = new WeakMap<
-  PothosSchemaTypes.SchemaBuilder<SchemaTypes>,
-  ((ref: ObjectRef<ConnectionShape<SchemaTypes, unknown, boolean>>) => void)[]
->();
+const pageInfoRefMap = new WeakMap<PothosSchemaTypes.SchemaBuilder<SchemaTypes>, ObjectRef<SchemaTypes, PageInfoShape>>();
+const nodeInterfaceRefMap = new WeakMap<PothosSchemaTypes.SchemaBuilder<SchemaTypes>, InterfaceRef<SchemaTypes, {}>>();
+export const connectionRefs = new WeakMap<PothosSchemaTypes.SchemaBuilder<SchemaTypes>, ObjectRef<SchemaTypes, ConnectionShape<SchemaTypes, unknown, boolean>>[]>();
+export const globalConnectionFieldsMap = new WeakMap<PothosSchemaTypes.SchemaBuilder<SchemaTypes>, ((ref: ObjectRef<SchemaTypes, ConnectionShape<SchemaTypes, unknown, boolean>>) => void)[]>();
 schemaBuilderProto.pageInfoRef = function pageInfoRef() {
-<<<<<<< HEAD
-  if (pageInfoRefMap.has(this)) {
-    return pageInfoRefMap.get(this)!;
-  }
-  const ref = this.objectRef<PageInfoShape>('PageInfo');
-  pageInfoRefMap.set(this, ref);
-  const {
-    cursorType = 'String',
-    hasNextPageFieldOptions = {} as never,
-    hasPreviousPageFieldOptions = {} as never,
-    startCursorFieldOptions = {} as never,
-    endCursorFieldOptions = {} as never,
-  } = this.options.relay ?? {};
-  ref.implement({
-    ...this.options.relay?.pageInfoTypeOptions,
-    fields: (t) => ({
-      hasNextPage: t.exposeBoolean('hasNextPage', {
-        nullable: false,
-        ...hasNextPageFieldOptions,
-      }),
-      hasPreviousPage: t.exposeBoolean('hasPreviousPage', {
-        nullable: false,
-        ...hasPreviousPageFieldOptions,
-      }),
-      startCursor: t.expose('startCursor', {
-        nullable: true,
-        ...(startCursorFieldOptions as {}),
-        type: cursorType,
-      }) as never,
-      endCursor: t.expose('endCursor', {
-        nullable: true,
-        ...(endCursorFieldOptions as {}),
-        type: cursorType,
-      }) as never,
-    }),
-  });
-  return ref;
-=======
     if (pageInfoRefMap.has(this)) {
         return pageInfoRefMap.get(this)!;
     }
@@ -111,7 +61,6 @@ schemaBuilderProto.pageInfoRef = function pageInfoRef() {
         }),
     });
     return ref;
->>>>>>> 9838cc71 (Update relay plugin default options)
 };
 schemaBuilderProto.nodeInterfaceRef = function nodeInterfaceRef() {
   if (nodeInterfaceRefMap.has(this)) {
@@ -188,12 +137,25 @@ schemaBuilderProto.nodeInterfaceRef = function nodeInterfaceRef() {
                 ...nodeQueryOptions?.args?.id?.extensions,
               },
             }),
-          },
-          resolve: resolveNodeFn
-            ? (root, args, context, info) =>
-                resolveNodeFn(
-                  root,
-                  args as {
+        }),
+    });
+    const nodeQueryOptions = this.options.relay?.nodeQueryOptions;
+    if (nodeQueryOptions !== false) {
+        const resolveNodeFn = nodeQueryOptions?.resolve;
+        this.queryField("node", (t) => t.field({
+            nullable: true,
+            ...this.options.relay?.nodeQueryOptions,
+            type: ref as InterfaceRef<SchemaTypes, unknown>,
+            args: {
+                id: t.arg.globalID({
+                    required: true,
+                    extensions: {
+                        relayGlobalIDAlwaysParse: true,
+                    },
+                }),
+            },
+            resolve: resolveNodeFn
+                ? (root, args, context, info) => resolveNodeFn(root, args as {
                     id: {
                       id: string;
                       typename: string;
@@ -219,30 +181,20 @@ schemaBuilderProto.nodeInterfaceRef = function nodeInterfaceRef() {
                       id: string;
                       typename: string;
                     },
-                  ]),
-                  (nodes) => nodes[0],
-                ),
-        }) as FieldRef<unknown>,
-    );
-  }
-  const nodesQueryOptions = this.options.relay?.nodesQueryOptions;
-  if (nodesQueryOptions !== false) {
-    const resolveNodesFn = nodesQueryOptions?.resolve;
-    this.queryField('nodes', (t) =>
-      t.field({
-        nullable: {
-          list: false,
-          items: true,
-        },
-        ...this.options.relay?.nodesQueryOptions,
-        type: [ref],
-        args: {
-          ids: t.arg.globalIDList({
-            ...nodesQueryOptions?.args?.ids,
-            required: true,
-            extensions: {
-              relayGlobalIDAlwaysParse: true,
-              ...nodesQueryOptions?.args?.ids?.extensions,
+                ]), (nodes) => nodes[0])) as never
+                : (root, args, context, info) => completeValue(resolveNodes(this, context, info, [args.id as {
+                        id: string;
+                        typename: string;
+                    }]), (nodes) => nodes[0]),
+        }) as FieldRef<SchemaTypes, unknown>);
+    }
+    const nodesQueryOptions = this.options.relay?.nodesQueryOptions;
+    if (nodesQueryOptions !== false) {
+        const resolveNodesFn = nodesQueryOptions?.resolve;
+        this.queryField("nodes", (t) => t.field({
+            nullable: {
+                list: false,
+                items: true,
             },
           }),
         },
@@ -352,6 +304,7 @@ schemaBuilderProto.node = function node(param, { interfaces, extensions, id, ...
 };
 schemaBuilderProto.globalConnectionField = function globalConnectionField(name, field) {
 <<<<<<< HEAD
+<<<<<<< HEAD
     this.globalConnectionFields((t) => ({ [name]: field(t) }));
 };
 schemaBuilderProto.globalConnectionFields = function globalConnectionFields(fields) {
@@ -369,12 +322,17 @@ schemaBuilderProto.globalConnectionFields = function globalConnectionFields(fiel
                 return refs;
             });
         });
+=======
+    const onRef = (ref: ObjectRef<SchemaTypes, ConnectionShape<SchemaTypes, unknown, boolean>>) => {
+        this.objectField(ref, name, field as ObjectFieldThunk<SchemaTypes, ConnectionShape<SchemaTypes, unknown, boolean>>);
+>>>>>>> 99ee9cca3 (Add builder and SchemaTypes to field and type refs)
     };
     connectionRefs.get(this)?.forEach((ref) => void onRef(ref));
     if (!globalConnectionFieldsMap.has(this)) {
         globalConnectionFieldsMap.set(this, []);
     }
     globalConnectionFieldsMap.get(this)!.push(onRef);
+<<<<<<< HEAD
 =======
   const onRef = (ref: ObjectRef<ConnectionShape<SchemaTypes, unknown, boolean>>) => {
     this.objectField(
@@ -402,59 +360,24 @@ schemaBuilderProto.globalConnectionFields = function globalConnectionFields(fiel
   }
   globalConnectionFieldsMap.get(this)!.push(onRef);
 >>>>>>> bc5c46910 (support versioned builder options and rename relayOptions to relay)
+=======
+};
+schemaBuilderProto.globalConnectionFields = function globalConnectionFields(fields) {
+    const onRef = (ref: ObjectRef<SchemaTypes, ConnectionShape<SchemaTypes, unknown, boolean>>) => {
+        this.objectFields(ref, fields as ObjectFieldsShape<SchemaTypes, ConnectionShape<SchemaTypes, unknown, boolean>>);
+    };
+    connectionRefs.get(this)?.forEach((ref) => void onRef(ref));
+    if (!globalConnectionFieldsMap.has(this)) {
+        globalConnectionFieldsMap.set(this, []);
+    }
+    globalConnectionFieldsMap.get(this)!.push(onRef);
+>>>>>>> 99ee9cca3 (Add builder and SchemaTypes to field and type refs)
 };
 const mutationIdCache = createContextCache(() => new Map<string, string>());
-<<<<<<< HEAD
-schemaBuilderProto.relayMutationField = function relayMutationField(
-  fieldName,
-  inputOptionsOrRef,
-  { resolve, ...fieldOptions },
-  {
-    name: payloadName = `${capitalize(fieldName)}Payload`,
-    outputFields,
-    interfaces,
-    ...paylaodOptions
-  },
-) {
-  const {
-    relay: {
-      clientMutationIdInputOptions = {} as never,
-      clientMutationIdFieldOptions = {} as never,
-      mutationInputArgOptions = {} as never,
-    } = {},
-  } = this.options;
-  const includeClientMutationId = this.options.relay?.clientMutationId !== 'omit';
-  let inputRef: InputObjectRef<unknown>;
-  let argName = 'input';
-  if (inputOptionsOrRef instanceof InputObjectRef) {
-    inputRef = inputOptionsOrRef;
-  } else {
-    const {
-      name: inputName = `${capitalize(fieldName)}Input`,
-      argName: argNameFromOptions = 'input',
-      inputFields,
-      ...inputOptions
-    } = inputOptionsOrRef;
-    argName = argNameFromOptions;
-    inputRef = this.inputType(inputName, {
-      ...this.options.relay?.defaultMutationInputTypeOptions,
-      ...inputOptions,
-      fields: (t) => ({
-        ...inputFields(t),
-        ...(includeClientMutationId
-          ? {
-              clientMutationId: t.id({
-                ...clientMutationIdInputOptions,
-                required: this.options.relay?.clientMutationId !== 'optional',
-              }),
-            }
-          : {}),
-      }),
-=======
 schemaBuilderProto.relayMutationField = function relayMutationField(fieldName, inputOptionsOrRef, { resolve, ...fieldOptions }, { name: payloadName = `${capitalize(fieldName)}Payload`, outputFields, interfaces, ...paylaodOptions }) {
     const { relay: { clientMutationIdInputOptions = {} as never, clientMutationIdFieldOptions = {} as never, mutationInputArgOptions = {} as never, } = {}, } = this.options;
     const includeClientMutationId = this.options.relay?.clientMutationId && this.options.relay?.clientMutationId !== "omit";
-    let inputRef: InputObjectRef<unknown>;
+    let inputRef: InputObjectRef<SchemaTypes, unknown>;
     let argName = "input";
     if (inputOptionsOrRef instanceof InputObjectRef) {
         inputRef = inputOptionsOrRef;
@@ -494,7 +417,6 @@ schemaBuilderProto.relayMutationField = function relayMutationField(fieldName, i
                 }
                 : {}),
         }),
->>>>>>> 9838cc71 (Update relay plugin default options)
     });
   }
   const payloadRef = this.objectRef<unknown>(payloadName).implement({
@@ -636,54 +558,6 @@ schemaBuilderProto.connectionObject = function connectionObject(
   globalConnectionFieldsMap.get(this)?.forEach((fieldFn) => void fieldFn(connectionRef));
   return connectionRef as never;
 };
-<<<<<<< HEAD
-schemaBuilderProto.edgeObject = function edgeObject({
-  type,
-  name: edgeName,
-  nodeNullable: nodeFieldNullable,
-  nodeField,
-  ...edgeOptions
-}) {
-  verifyRef(type);
-  const {
-    cursorType = 'String',
-    cursorFieldOptions = {} as never,
-    nodeFieldOptions: { nullable: nodeNullable = false, ...nodeFieldOptions } = {} as never,
-  } = this.options.relay ?? {};
-  const edgeRef = this.objectRef<{
-    cursor: string;
-    node: unknown;
-  }>(edgeName);
-  const edgeFields = edgeOptions.fields as
-    | ObjectFieldsShape<
-        SchemaTypes,
-        {
-          cursor: string;
-          node: unknown;
-        }
-      >
-    | undefined;
-  this.objectType(edgeRef, {
-    ...(this.options.relay?.defaultEdgeTypeOptions as {}),
-    ...edgeOptions,
-    fields: (t) => ({
-      node: t.field({
-        nullable: nodeFieldNullable ?? nodeNullable,
-        ...nodeFieldOptions,
-        ...nodeField,
-        type,
-        resolve: (parent) => parent.node as never,
-      }),
-      cursor: t.expose('cursor', {
-        nullable: false,
-        type: cursorType,
-        ...cursorFieldOptions,
-      }) as never,
-      ...edgeFields?.(t),
-    }),
-  });
-  return edgeRef as never;
-=======
 schemaBuilderProto.edgeObject = function edgeObject({ type, name: edgeName, nodeNullable: nodeFieldNullable, nodeField, ...edgeOptions }) {
     verifyRef(type);
     const { edgeCursorType = this.options.relay?.cursorType ?? "String", cursorFieldOptions = {} as never, nodeFieldOptions: { nullable: nodeNullable = false, ...nodeFieldOptions } = {} as never, } = this.options.relay ?? {};
@@ -715,5 +589,4 @@ schemaBuilderProto.edgeObject = function edgeObject({ type, name: edgeName, node
         }),
     });
     return edgeRef as never;
->>>>>>> 9838cc71 (Update relay plugin default options)
 };

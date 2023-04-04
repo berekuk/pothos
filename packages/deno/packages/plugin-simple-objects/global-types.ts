@@ -9,8 +9,13 @@ declare global {
             simpleObjects: PothosSimpleObjectsPlugin<Types>;
         }
         export interface SchemaBuilder<Types extends SchemaTypes> {
+<<<<<<< HEAD
             simpleObject: <Interfaces extends InterfaceParam<Types>[], Fields extends FieldMap, Shape extends Normalize<OutputShapeFromFields<Fields> & ParentShape<Types, Interfaces[number]>>>(name: string, options: SimpleObjectTypeOptions<Types, Interfaces, Fields, Shape>, fields?: ObjectFieldsShape<Types, Shape>) => ObjectRef<Shape>;
             simpleInterface: <Fields extends FieldMap, Shape extends OutputShapeFromFields<Fields>, Interfaces extends InterfaceParam<SchemaTypes>[]>(name: string, options: SimpleInterfaceTypeOptions<Types, Fields, Shape, Interfaces>, fields?: InterfaceFieldsShape<Types, Shape>) => InterfaceRef<Shape>;
+=======
+            simpleObject: <Interfaces extends InterfaceParam<Types>[], Fields extends FieldMap, Shape extends Normalize<OutputShapeFromFields<Fields> & ParentShape<Types, Interfaces[number]>>>(name: string, options: SimpleObjectTypeOptions<Types, Interfaces, Fields, Shape>) => ObjectRef<Types, Shape>;
+            simpleInterface: <Fields extends FieldMap, Shape extends OutputShapeFromFields<Fields>, Interfaces extends InterfaceParam<SchemaTypes>[]>(name: string, options: SimpleInterfaceTypeOptions<Types, Fields, Shape, Interfaces>) => InterfaceRef<Types, Shape>;
+>>>>>>> 6f53ee9c (Add builder and SchemaTypes to field and type refs)
         }
         export interface PothosKindToGraphQLType {
             SimpleObject: "Object";

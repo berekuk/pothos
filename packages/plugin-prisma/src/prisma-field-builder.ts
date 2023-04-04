@@ -45,7 +45,6 @@ import { FieldMap } from './util/relation-map';
 const RootBuilder: {
   // eslint-disable-next-line @typescript-eslint/prefer-function-type
   new <Types extends SchemaTypes, Shape, Kind extends FieldKind>(
-    name: string,
     builder: PothosSchemaTypes.SchemaBuilder<Types>,
     kind: FieldKind,
     graphqlKind: PothosSchemaTypes.PothosKindToGraphQLType[FieldKind],
@@ -128,14 +127,21 @@ export class PrismaObjectFieldBuilder<
           [
             connectionOptions:
               | ObjectRef<
+                  Types,
                   ShapeFromConnection<PothosSchemaTypes.ConnectionShapeHelper<Types, Shape, false>>
                 >
               | PothosSchemaTypes.ConnectionObjectOptions<
                   Types,
                   ObjectRef<
+                    Types,
                     ShapeFromTypeParam<
                       Types,
-                      [ObjectRef<Model['Relations'][Field & keyof Model['Relations']]['Shape']>],
+                      [
+                        ObjectRef<
+                          Types,
+                          Model['Relations'][Field & keyof Model['Relations']]['Shape']
+                        >,
+                      ],
                       Nullable
                     >
                   >,
@@ -145,7 +151,12 @@ export class PrismaObjectFieldBuilder<
                     Types,
                     ShapeFromTypeParam<
                       Types,
-                      [ObjectRef<Model['Relations'][Field & keyof Model['Relations']]['Shape']>],
+                      [
+                        ObjectRef<
+                          Types,
+                          Model['Relations'][Field & keyof Model['Relations']]['Shape']
+                        >,
+                      ],
                       Nullable
                     >,
                     Shape,
@@ -154,16 +165,25 @@ export class PrismaObjectFieldBuilder<
                   ConnectionInterfaces
                 >,
             edgeOptions:
-              | ObjectRef<{
-                  cursor: string;
-                  node?: ShapeFromTypeParam<Types, Model['Shape'], false>;
-                }>
+              | ObjectRef<
+                  Types,
+                  {
+                    cursor: string;
+                    node?: ShapeFromTypeParam<Types, Model['Shape'], false>;
+                  }
+                >
               | PothosSchemaTypes.ConnectionEdgeObjectOptions<
                   Types,
                   ObjectRef<
+                    Types,
                     ShapeFromTypeParam<
                       Types,
-                      [ObjectRef<Model['Relations'][Field & keyof Model['Relations']]['Shape']>],
+                      [
+                        ObjectRef<
+                          Types,
+                          Model['Relations'][Field & keyof Model['Relations']]['Shape']
+                        >,
+                      ],
                       Nullable
                     >
                   >,
@@ -172,7 +192,12 @@ export class PrismaObjectFieldBuilder<
                     Types,
                     ShapeFromTypeParam<
                       Types,
-                      [ObjectRef<Model['Relations'][Field & keyof Model['Relations']]['Shape']>],
+                      [
+                        ObjectRef<
+                          Types,
+                          Model['Relations'][Field & keyof Model['Relations']]['Shape']
+                        >,
+                      ],
                       Nullable
                     >,
                     Shape,
@@ -184,6 +209,7 @@ export class PrismaObjectFieldBuilder<
           0
         >
       ) => FieldRef<
+        Types,
         ShapeFromConnection<PothosSchemaTypes.ConnectionShapeHelper<Types, Shape, Nullable>>
       >
     : '@pothos/plugin-relay is required to use this method' = function relatedConnection(
@@ -200,7 +226,7 @@ export class PrismaObjectFieldBuilder<
       description,
       ...options
     }: {
-      type?: ObjectRef<unknown, unknown>;
+      type?: ObjectRef<Types, unknown, unknown>;
       totalCount?: boolean;
       maxSize?: number | ((args: {}, ctx: {}) => number);
       defaultSize?: number | ((args: {}, ctx: {}) => number);
@@ -300,7 +326,7 @@ export class PrismaObjectFieldBuilder<
 
     const fieldRef = (
       this as unknown as {
-        connection: (...args: unknown[]) => FieldRef<unknown>;
+        connection: (...args: unknown[]) => FieldRef<Types, unknown>;
       }
     ).connection(
       {
@@ -372,17 +398,20 @@ export class PrismaObjectFieldBuilder<
     return fieldRef;
   } as never;
 
+  typename: string;
+
   constructor(
-    name: string,
+    typename: string,
     builder: PothosSchemaTypes.SchemaBuilder<Types>,
     model: string,
     fieldMap: FieldMap,
     graphqlKind: PothosSchemaTypes.PothosKindToGraphQLType[FieldKind] = 'Object',
   ) {
-    super(name, builder, 'PrismaObject', graphqlKind);
+    super(builder, 'PrismaObject', graphqlKind);
 
     this.model = model;
     this.prismaFieldMap = fieldMap;
+    this.typename = typename;
   }
 
   relation<
@@ -406,7 +435,7 @@ export class PrismaObjectFieldBuilder<
         >,
       ]
     >
-  ): FieldRef<Model['Relations'][Field]['Shape'], 'Object'> {
+  ): FieldRef<Types, Model['Relations'][Field]['Shape'], 'Object'> {
     const [{ description, ...options } = {} as never] = allArgs;
     const relationField = getRelation(this.model, this.builder, name);
     const ref = options.type ?? getRefFromModel(relationField.type, this.builder);
@@ -439,7 +468,7 @@ export class PrismaObjectFieldBuilder<
             )),
       },
       resolve: (parent) => (parent as Record<string, never>)[name],
-    }) as FieldRef<Model['Relations'][Field]['Shape'], 'Object'>;
+    }) as FieldRef<Types, Model['Relations'][Field]['Shape'], 'Object'>;
   }
 
   relationCount<Field extends Model['RelationName']>(
@@ -454,7 +483,7 @@ export class PrismaObjectFieldBuilder<
         >,
       ]
     >
-  ): FieldRef<number, 'Object'> {
+  ): FieldRef<Types, number, 'Object'> {
     const [{ where, ...options } = {} as never] = allArgs;
 
     const { resolve, ...rest } = options;
@@ -481,26 +510,30 @@ export class PrismaObjectFieldBuilder<
       select: countSelect as never,
       resolve: (parent, args, context, info) =>
         (parent as unknown as { _count: Record<string, never> })._count?.[name],
-    }) as FieldRef<number, 'Object'>;
+    }) as FieldRef<Types, number, 'Object'>;
   }
 
-  variant<Variant extends Model['Name'] | PrismaRef<Model>, Args extends InputFieldMap, Nullable>(
+  variant<
+    Variant extends Model['Name'] | PrismaRef<Types, Model>,
+    Args extends InputFieldMap,
+    Nullable,
+  >(
     variant: Variant,
     ...allArgs: NormalizeArgs<
       [
         options: VariantFieldOptions<
           Types,
           Model,
-          Variant extends PrismaRef<Model> ? Variant : PrismaRef<Model>,
+          Variant extends PrismaRef<Types, Model> ? Variant : PrismaRef<Types, Model>,
           Args,
           Nullable,
           Shape
         >,
       ]
     >
-  ): FieldRef<Model['Shape'], 'Object'> {
+  ): FieldRef<Types, Model['Shape'], 'Object'> {
     const [{ isNull, nullable, ...options } = {} as never] = allArgs;
-    const ref: PrismaRef<PrismaModelTypes> =
+    const ref: PrismaRef<Types, PrismaModelTypes> =
       typeof variant === 'string' ? getRefFromModel(variant, this.builder) : variant;
 
     const selfSelect = (args: object, context: object, nestedQuery: (query: unknown) => unknown) =>
@@ -526,7 +559,7 @@ export class PrismaObjectFieldBuilder<
             return parent as never;
           }
         : (parent) => parent as never,
-    }) as FieldRef<Model['Shape'], 'Object'>;
+    }) as FieldRef<Types, Model['Shape'], 'Object'>;
   }
 
   expose<
@@ -603,7 +636,7 @@ export class PrismaObjectFieldBuilder<
             },
         ]
       >
-    ): FieldRef<ShapeFromTypeParam<Types, Type, Nullable>, 'PrismaObject'> => {
+    ): FieldRef<Types, ShapeFromTypeParam<Types, Type, Nullable>, 'PrismaObject'> => {
       const [options = {} as never] = args;
 
       return this.expose<Type, Nullable, ResolveReturnShape, never>(

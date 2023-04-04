@@ -31,7 +31,7 @@ declare global {
         name: string,
         options: SimpleObjectTypeOptions<Types, Interfaces, Fields, Shape>,
         fields?: ObjectFieldsShape<Types, Shape>,
-      ) => ObjectRef<Shape>;
+      ) => ObjectRef<Types, Shape>;
 
       simpleInterface: <
         Fields extends FieldMap,
@@ -41,7 +41,7 @@ declare global {
         name: string,
         options: SimpleInterfaceTypeOptions<Types, Fields, Shape, Interfaces>,
         fields?: InterfaceFieldsShape<Types, Shape>,
-      ) => InterfaceRef<Shape>;
+      ) => InterfaceRef<Types, Shape>;
     }
 
     export interface PothosKindToGraphQLType {

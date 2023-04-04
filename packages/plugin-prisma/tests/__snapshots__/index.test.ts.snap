@@ -92,10 +92,10 @@ interface Node {
 }
 
 type NormalViewer implements Viewer {
-  aComments(after: ID, before: ID, first: Int, last: Int): CommentConnection!
+  aComments(after: String, before: String, first: Int, last: Int): CommentConnection!
   bio: String
-  comments(after: ID, before: ID, first: Int, last: Int): ViewerCommentsConnection!
-  commentsWithNewQuery(after: ID, before: ID, first: Int, last: Int): ViewerCommentsWithNewQueryConnection!
+  comments(after: String, before: String, first: Int, last: Int): ViewerCommentsConnection!
+  commentsWithNewQuery(after: String, before: String, first: Int, last: Int): ViewerCommentsWithNewQueryConnection!
   id: ID!
   isNormal: Boolean!
   postCount: Int!
@@ -119,7 +119,6 @@ type Post {
   commentAuthorIds: [ID!]!
   comments: [Comment!]!
   commentsConnection(after: String, before: String, first: Int, last: Int): CommentConnection!
-  \\"\\"\\"Content for the post\\"\\"\\"
   content: String
   createdAt: String!
   id: ID!
@@ -183,11 +182,11 @@ type Query {
   manualConnection(after: String, before: String, first: Int, last: Int): QueryManualConnection!
   me: User
   named: [Named]
-  namedUnion: [NamedUnion]
   namedConnection(after: String, before: String, first: Int, last: Int): QueryNamedConnection!
+  namedUnion: [NamedUnion]
   node(id: ID!): Node
   nodes(ids: [ID!]!): [Node]!
-  nullableUserConnection(after: ID, before: ID, first: Int, last: Int): QueryNullableUserConnection
+  nullableUserConnection(after: String, before: String, first: Int, last: Int): QueryNullableUserConnection
   post(id: ID!): Post
   posts: [Post!]!
   postsBigIntCursor(after: String, before: String, first: Int, last: Int): QueryPostsBigIntCursorConnection!
@@ -337,8 +336,7 @@ type QueryWithIDSelectConnectionEdge {
 
 \\"\\"\\"Model for Posts!\\"\\"\\"
 type SelectPost implements Node {
-  comments(after: ID, before: ID, first: Int, last: Int): CommentConnection!
-  \\"\\"\\"Content for the post\\"\\"\\"
+  comments(after: String, before: String, first: Int, last: Int): CommentConnection!
   content: String
   createdAt: String!
   id: ID!
@@ -507,11 +505,10 @@ type UserProfileWithErrorsSuccess {
 }
 
 interface Viewer {
-  aComments(after: ID, before: ID, first: Int, last: Int): CommentConnection!
+  aComments(after: String, before: String, first: Int, last: Int): CommentConnection!
   bio: String
   comments(after: String, before: String, first: Int, last: Int): ViewerCommentsConnection!
-  commentsWithNewQuery(after: ID, before: ID, first: Int, last: Int): ViewerCommentsWithNewQueryConnection!
-  comments(after: String, before: String, first: Int, last: Int): ViewerCommentsConnection!
+  commentsWithNewQuery(after: String, before: String, first: Int, last: Int): ViewerCommentsWithNewQueryConnection!
   id: ID!
   postCount: Int!
   postPreviews: [PostPreview!]!
