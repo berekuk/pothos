@@ -25,14 +25,14 @@ import {
 import type {
   IntFieldUpdateOperationsInput,
   IntUpdateOps,
+  PothosPrismaUtilsPlugin,
   PrismaIntAtomicUpdateOptions,
-  PrismaUtilsPlugin,
 } from '.';
 
 declare global {
   export namespace PothosSchemaTypes {
     export interface Plugins<Types extends SchemaTypes> {
-      prismaUtils: PrismaUtilsPlugin<Types>;
+      prismaUtils: PothosPrismaUtilsPlugin<Types>;
     }
 
     export interface SchemaBuilder<Types extends SchemaTypes> {
