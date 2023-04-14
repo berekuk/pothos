@@ -8,7 +8,7 @@ import {
   GraphQLSchema,
   GraphQLUnionType,
 } from 'graphql';
-import { InputTypeRef, SchemaTypes } from '@pothos/core';
+import { SchemaTypes } from '@pothos/core';
 import {
   AddGraphQLEnumTypeOptions,
   AddGraphQLInputTypeOptions,
@@ -57,7 +57,7 @@ declare global {
       addGraphQLInput: <Shape extends {}>(
         type: GraphQLInputObjectType,
         options: AddGraphQLInputTypeOptions<Types, Shape>,
-      ) => InputTypeRef<Types, Shape>;
+      ) => InputObjectRef<Types, Shape>;
     }
   }
 }

@@ -27,6 +27,7 @@ const { dmmf } = Prisma.Prisma;
 
 class PrismaGenerator {
   statements: ts.Statement[] = [];
+
   addedTypes: Set<string> = new Set();
 
   addCreate(type: string, without: string[] = []) {

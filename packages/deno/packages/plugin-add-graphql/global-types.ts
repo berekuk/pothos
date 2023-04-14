@@ -1,7 +1,7 @@
 // @ts-nocheck
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { GraphQLEnumType, GraphQLInputObjectType, GraphQLInterfaceType, GraphQLNamedType, GraphQLObjectType, GraphQLSchema, GraphQLUnionType, } from 'https://cdn.skypack.dev/graphql?dts';
-import { InputTypeRef, SchemaTypes } from '../core/index.ts';
+import { SchemaTypes } from '../core/index.ts';
 import { AddGraphQLEnumTypeOptions, AddGraphQLInputTypeOptions, AddGraphQLInterfaceTypeOptions, AddGraphQLObjectTypeOptions, AddGraphQLUnionTypeOptions, EnumValuesWithShape, } from './types.ts';
 import type { PothosAddGraphQLPlugin } from './index.ts';
 declare global {
@@ -20,7 +20,7 @@ declare global {
             addGraphQLInterface: <Shape>(type: GraphQLInterfaceType, options: AddGraphQLInterfaceTypeOptions<Types, Shape>) => InterfaceRef<Types, Shape>;
             addGraphQLUnion: <Shape>(type: GraphQLUnionType, options: AddGraphQLUnionTypeOptions<Types, ObjectRef<Types, Shape>>) => UnionRef<Types, Shape>;
             addGraphQLEnum: <Shape extends string | number>(type: GraphQLEnumType, options: AddGraphQLEnumTypeOptions<Types, EnumValuesWithShape<Types, Shape>>) => EnumRef<Types, Shape>;
-            addGraphQLInput: <Shape extends {}>(type: GraphQLInputObjectType, options: AddGraphQLInputTypeOptions<Types, Shape>) => InputTypeRef<Types, Shape>;
+            addGraphQLInput: <Shape extends {}>(type: GraphQLInputObjectType, options: AddGraphQLInputTypeOptions<Types, Shape>) => InputObjectRef<Types, Shape>;
         }
     }
 }

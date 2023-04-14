@@ -12,26 +12,30 @@ import {
   GraphQLTypeResolver,
   lexicographicSortSchema,
 } from 'graphql';
-import BuildCache from './build-cache';
-import ConfigStore from './config-store';
+import { BuildCache } from './build-cache';
+import { ConfigStore } from './config-store';
 import { PothosError, PothosSchemaError } from './errors';
-import InputFieldBuilder from './fieldUtils/input';
-import InterfaceFieldBuilder from './fieldUtils/interface';
-import MutationFieldBuilder from './fieldUtils/mutation';
-import ObjectFieldBuilder from './fieldUtils/object';
-import QueryFieldBuilder from './fieldUtils/query';
-import SubscriptionFieldBuilder from './fieldUtils/subscription';
-import BaseTypeRef from './refs/base';
-import EnumRef from './refs/enum';
-import InputObjectRef, { ImplementableInputObjectRef } from './refs/input-object';
-import InterfaceRef, { ImplementableInterfaceRef } from './refs/interface';
-import ObjectRef, { ImplementableObjectRef } from './refs/object';
-import ScalarRef from './refs/scalar';
-import UnionRef from './refs/union';
+import { InputFieldBuilder } from './fieldUtils/input';
+import { InterfaceFieldBuilder } from './fieldUtils/interface';
+import { MutationFieldBuilder } from './fieldUtils/mutation';
+import { ObjectFieldBuilder } from './fieldUtils/object';
+import { QueryFieldBuilder } from './fieldUtils/query';
+import { SubscriptionFieldBuilder } from './fieldUtils/subscription';
+import { BaseTypeRef } from './refs/base';
+import { EnumRef } from './refs/enum';
+import { ImplementableInputObjectRef, InputObjectRef } from './refs/input-object';
+import { ImplementableInterfaceRef, InterfaceRef } from './refs/interface';
+import { MutationRef } from './refs/mutation';
+import { ImplementableObjectRef, ObjectRef } from './refs/object';
+import { QueryRef } from './refs/query';
+import { ScalarRef } from './refs/scalar';
+import { SubscriptionRef } from './refs/subscription';
+import { UnionRef } from './refs/union';
 import type {
   AbstractReturnShape,
   AddVersionedDefaultsToBuilderOptions,
   BaseEnum,
+  ConfigurableRef,
   EnumParam,
   EnumTypeOptions,
   EnumValues,
@@ -52,18 +56,8 @@ import type {
   ObjectParam,
   ObjectTypeOptions,
   OutputShape,
-  OutputType,
   ParentShape,
   PluginConstructorMap,
-  PothosEnumTypeConfig,
-  PothosInputObjectTypeConfig,
-  PothosInterfaceTypeConfig,
-  PothosMutationTypeConfig,
-  PothosObjectTypeConfig,
-  PothosQueryTypeConfig,
-  PothosScalarTypeConfig,
-  PothosSubscriptionTypeConfig,
-  PothosUnionTypeConfig,
   QueryFieldsShape,
   QueryFieldThunk,
   ScalarName,
@@ -75,7 +69,7 @@ import type {
 } from './types';
 import { normalizeEnumValues, valuesFromEnum, verifyInterfaces, verifyRef } from './utils';
 
-export default class SchemaBuilder<Types extends SchemaTypes> {
+export class SchemaBuilder<Types extends SchemaTypes> {
   static plugins: Partial<PluginConstructorMap<SchemaTypes>> = {};
 
   static optionNormalizers: Map<
@@ -112,7 +106,7 @@ export default class SchemaBuilder<Types extends SchemaTypes> {
       return opts;
     }, options);
 
-    this.configStore = new ConfigStore<Types>();
+    this.configStore = new ConfigStore<Types>(this);
 
     this.defaultFieldNullability =
       (
@@ -153,7 +147,7 @@ export default class SchemaBuilder<Types extends SchemaTypes> {
     param: Param,
     options: ObjectTypeOptions<Types, Param, ParentShape<Types, Param>, Interfaces>,
     fields?: ObjectFieldsShape<Types, ParentShape<Types, Param>>,
-  ) {
+  ): PothosSchemaTypes.ObjectRef<Types, OutputShape<Types, Param>, ParentShape<Types, Param>> {
     verifyRef(param);
     verifyInterfaces(options.interfaces);
 
@@ -171,7 +165,7 @@ export default class SchemaBuilder<Types extends SchemaTypes> {
         ? (param as ObjectRef<Types, OutputShape<Types, Param>, ParentShape<Types, Param>>)
         : new ObjectRef<Types, OutputShape<Types, Param>, ParentShape<Types, Param>>(name);
 
-    const config: PothosObjectTypeConfig = {
+    ref.updateConfig({
       kind: 'Object',
       graphqlKind: 'Object',
       name,
@@ -180,56 +174,52 @@ export default class SchemaBuilder<Types extends SchemaTypes> {
       extensions: options.extensions,
       isTypeOf: options.isTypeOf,
       pothosOptions: options as PothosSchemaTypes.ObjectTypeOptions,
-    };
-
-    this.configStore.addTypeConfig(config, ref);
+    });
 
     if (options.interfaces) {
-      this.configStore.addInterfaces(name, options.interfaces);
+      ref.addInterfaces(options.interfaces);
     }
 
-    if (typeof param === 'function') {
-      this.configStore.associateRefWithName(param, name);
+    if (ref !== param && typeof param !== 'string') {
+      this.configStore.associateParamWithRef(param, ref);
     }
 
     if (fields) {
-      this.configStore.addFields(ref, () =>
-        fields(new ObjectFieldBuilder<Types, ParentShape<Types, Param>>(this)),
-      );
+      ref.addFields(() => fields(new ObjectFieldBuilder<Types, ParentShape<Types, Param>>(this)));
     }
 
     if (options.fields) {
-      this.configStore.addFields(ref, () => {
+      ref.addFields(() => {
         const t = new ObjectFieldBuilder<Types, ParentShape<Types, Param>>(this);
 
         return options.fields!(t);
       });
     }
 
+    this.configStore.addTypeRef(ref);
+
     return ref;
   }
 
   objectFields<Type extends ObjectParam<Types>>(
-    ref: Type,
+    param: Type,
     fields: ObjectFieldsShape<Types, ParentShape<Types, Type>>,
   ) {
-    verifyRef(ref);
-    this.configStore.onTypeConfig(ref, ({ name }) => {
-      this.configStore.addFields(ref, () => fields(new ObjectFieldBuilder(this)));
-    });
+    verifyRef(param);
+    this.configStore.addFields(param, () =>
+      fields(new ObjectFieldBuilder<Types, ParentShape<Types, Type>>(this)),
+    );
   }
 
   objectField<Type extends ObjectParam<Types>>(
-    ref: Type,
+    param: Type,
     fieldName: string,
     field: ObjectFieldThunk<Types, ParentShape<Types, Type>>,
   ) {
-    verifyRef(ref);
-    this.configStore.onTypeConfig(ref, ({ name }) => {
-      this.configStore.addFields(ref, () => ({
-        [fieldName]: field(new ObjectFieldBuilder(this)),
-      }));
-    });
+    verifyRef(param);
+    this.configStore.addFields(param, () => ({
+      [fieldName]: field(new ObjectFieldBuilder<Types, ParentShape<Types, Type>>(this)),
+    }));
   }
 
   queryType(
@@ -237,29 +227,26 @@ export default class SchemaBuilder<Types extends SchemaTypes> {
       [options: PothosSchemaTypes.QueryTypeOptions<Types>, fields?: QueryFieldsShape<Types>],
       0
     >
-  ) {
+  ): QueryRef<Types> {
     const [options = {}, fields] = args;
-    const config: PothosQueryTypeConfig = {
+
+    const ref = new QueryRef<Types>('Query', {
       kind: 'Query',
       graphqlKind: 'Object',
       name: 'Query',
       description: options.description,
       pothosOptions: options as unknown as PothosSchemaTypes.QueryTypeOptions,
       extensions: options.extensions,
-    };
+    });
 
-    const ref = new ObjectRef<Types, OutputShape<Types, 'Query'>, ParentShape<Types, 'Query'>>(
-      'Query',
-    );
-
-    this.configStore.addTypeConfig(config, ref);
+    this.configStore.addTypeRef(ref);
 
     if (fields) {
-      this.configStore.addFields('Query', () => fields(new QueryFieldBuilder(this)));
+      ref.addFields(() => fields(new QueryFieldBuilder(this)));
     }
 
     if (options.fields) {
-      this.configStore.addFields('Query', () => options.fields!(new QueryFieldBuilder(this)));
+      ref.addFields(() => options.fields!(new QueryFieldBuilder(this)));
     }
 
     return ref;
@@ -282,16 +269,17 @@ export default class SchemaBuilder<Types extends SchemaTypes> {
     >
   ) {
     const [options = {}, fields] = args;
-    const config: PothosMutationTypeConfig = {
+
+    const ref = new MutationRef<Types>('Mutation', {
       kind: 'Mutation',
       graphqlKind: 'Object',
       name: 'Mutation',
       description: options.description,
       pothosOptions: options as unknown as PothosSchemaTypes.MutationTypeOptions,
       extensions: options.extensions,
-    };
+    });
 
-    this.configStore.addTypeConfig(config);
+    this.configStore.addTypeRef(ref);
 
     if (fields) {
       this.configStore.addFields('Mutation', () => fields(new MutationFieldBuilder(this)));
@@ -300,6 +288,8 @@ export default class SchemaBuilder<Types extends SchemaTypes> {
     if (options.fields) {
       this.configStore.addFields('Mutation', () => options.fields!(new MutationFieldBuilder(this)));
     }
+
+    return ref;
   }
 
   mutationFields(fields: MutationFieldsShape<Types>) {
@@ -322,16 +312,17 @@ export default class SchemaBuilder<Types extends SchemaTypes> {
     >
   ) {
     const [options = {}, fields] = args;
-    const config: PothosSubscriptionTypeConfig = {
+
+    const ref = new SubscriptionRef<Types>('Subscription', {
       kind: 'Subscription',
       graphqlKind: 'Object',
       name: 'Subscription',
       description: options.description,
       pothosOptions: options as unknown as PothosSchemaTypes.SubscriptionTypeOptions,
       extensions: options.extensions,
-    };
+    });
 
-    this.configStore.addTypeConfig(config);
+    this.configStore.addTypeRef(ref);
 
     if (fields) {
       this.configStore.addFields('Subscription', () => fields(new SubscriptionFieldBuilder(this)));
@@ -342,6 +333,8 @@ export default class SchemaBuilder<Types extends SchemaTypes> {
         options.fields!(new SubscriptionFieldBuilder(this)),
       );
     }
+
+    return ref;
   }
 
   subscriptionFields(fields: SubscriptionFieldsShape<Types>) {
@@ -368,7 +361,11 @@ export default class SchemaBuilder<Types extends SchemaTypes> {
     param: Param,
     options: InterfaceTypeOptions<Types, Param, ParentShape<Types, Param>, Interfaces, ResolveType>,
     fields?: InterfaceFieldsShape<Types, ParentShape<Types, Param>>,
-  ) {
+  ): PothosSchemaTypes.InterfaceRef<
+    Types,
+    AbstractReturnShape<Types, Param, ResolveType>,
+    ParentShape<Types, Param>
+  > {
     verifyRef(param);
     verifyInterfaces(options.interfaces);
 
@@ -392,7 +389,7 @@ export default class SchemaBuilder<Types extends SchemaTypes> {
 
     const typename = ref.name;
 
-    const config: PothosInterfaceTypeConfig = {
+    ref.updateConfig({
       kind: 'Interface',
       graphqlKind: 'Interface',
       name: typename,
@@ -401,16 +398,16 @@ export default class SchemaBuilder<Types extends SchemaTypes> {
       pothosOptions: options as unknown as PothosSchemaTypes.InterfaceTypeOptions,
       extensions: options.extensions,
       resolveType: options.resolveType as GraphQLTypeResolver<unknown, unknown>,
-    };
+    });
 
-    this.configStore.addTypeConfig(config, ref);
+    this.configStore.addTypeRef(ref);
 
     if (options.interfaces) {
-      this.configStore.addInterfaces(typename, options.interfaces);
+      ref.addInterfaces(options.interfaces);
     }
 
-    if (typeof param === 'function') {
-      this.configStore.associateRefWithName(param, name);
+    if (ref !== param && typeof param !== 'string') {
+      this.configStore.associateParamWithRef(param, ref);
     }
 
     if (fields) {
@@ -429,9 +426,8 @@ export default class SchemaBuilder<Types extends SchemaTypes> {
     fields: InterfaceFieldsShape<Types, ParentShape<Types, Type>>,
   ) {
     verifyRef(ref);
-    this.configStore.onTypeConfig(ref, ({ name }) => {
-      this.configStore.addFields(ref, () => fields(new InterfaceFieldBuilder(this)));
-    });
+
+    this.configStore.addFields(ref, () => fields(new InterfaceFieldBuilder(this)));
   }
 
   interfaceField<Type extends InterfaceParam<Types>>(
@@ -440,29 +436,25 @@ export default class SchemaBuilder<Types extends SchemaTypes> {
     field: InterfaceFieldThunk<Types, ParentShape<Types, Type>>,
   ) {
     verifyRef(ref);
-    this.configStore.onTypeConfig(ref, ({ name }) => {
-      this.configStore.addFields(ref, () => ({
-        [fieldName]: field(new InterfaceFieldBuilder(this)),
-      }));
-    });
+
+    this.configStore.addFields(ref, () => ({
+      [fieldName]: field(new InterfaceFieldBuilder(this)),
+    }));
   }
 
   unionType<Member extends ObjectParam<Types>, ResolveType>(
     name: string,
     options: PothosSchemaTypes.UnionTypeOptions<Types, Member, ResolveType>,
-  ) {
+  ): PothosSchemaTypes.UnionRef<
+    Types,
+    AbstractReturnShape<Types, Member, ResolveType>,
+    ParentShape<Types, Member>
+  > {
     const ref = new UnionRef<
+      Types,
       AbstractReturnShape<Types, Member, ResolveType>,
       ParentShape<Types, Member>
-    >(name);
-
-    if (Array.isArray(options.types)) {
-      options.types.forEach((type) => {
-        verifyRef(type);
-      });
-    }
-
-    const config: PothosUnionTypeConfig = {
+    >(name, {
       kind: 'Union',
       graphqlKind: 'Union',
       name,
@@ -471,10 +463,16 @@ export default class SchemaBuilder<Types extends SchemaTypes> {
       resolveType: options.resolveType as GraphQLTypeResolver<unknown, object>,
       pothosOptions: options as unknown as PothosSchemaTypes.UnionTypeOptions,
       extensions: options.extensions,
-    };
+    });
 
-    this.configStore.addTypeConfig(config, ref);
-    this.configStore.addUnionTypes(name, options.types);
+    if (Array.isArray(options.types)) {
+      options.types.forEach((type) => {
+        verifyRef(type);
+      });
+    }
+
+    this.configStore.addTypeRef(ref);
+    ref.addTypes(options.types);
 
     return ref;
   }
@@ -482,13 +480,12 @@ export default class SchemaBuilder<Types extends SchemaTypes> {
   enumType<Param extends EnumParam, Values extends EnumValues<Types>>(
     param: Param,
     options: EnumTypeOptions<Types, Param, Values>,
-  ) {
+  ): PothosSchemaTypes.EnumRef<
+    Types,
+    Param extends BaseEnum ? ValuesFromEnum<Param> : ShapeFromEnumValues<Types, Values>
+  > {
     verifyRef(param);
     const name = typeof param === 'string' ? param : (options as { name: string }).name;
-    const ref = new EnumRef<
-      Types,
-      Param extends BaseEnum ? ValuesFromEnum<Param> : ShapeFromEnumValues<Types, Values>
-    >(name);
 
     const values =
       typeof param === 'object'
@@ -499,7 +496,10 @@ export default class SchemaBuilder<Types extends SchemaTypes> {
           )
         : normalizeEnumValues<Types>((options as { values: EnumValues<Types> }).values);
 
-    const config: PothosEnumTypeConfig = {
+    const ref = new EnumRef<
+      Types,
+      Param extends BaseEnum ? ValuesFromEnum<Param> : ShapeFromEnumValues<Types, Values>
+    >(name, {
       kind: 'Enum',
       graphqlKind: 'Enum',
       name,
@@ -507,13 +507,12 @@ export default class SchemaBuilder<Types extends SchemaTypes> {
       description: options.description,
       pothosOptions: options as unknown as PothosSchemaTypes.EnumTypeOptions<Types>,
       extensions: options.extensions,
-    };
+    });
 
-    this.configStore.addTypeConfig(config, ref);
+    this.configStore.addTypeRef(ref);
 
     if (typeof param !== 'string') {
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-      this.configStore.associateRefWithName(param as BaseEnum, name);
+      this.configStore.associateParamWithRef(param as ConfigurableRef<Types>, ref);
     }
 
     return ref;
@@ -526,10 +525,8 @@ export default class SchemaBuilder<Types extends SchemaTypes> {
       InputShape<Types, Name>,
       ParentShape<Types, Name>
     >,
-  ) {
-    const ref = new ScalarRef<Types, InputShape<Types, Name>, ParentShape<Types, Name>>(name);
-
-    const config: PothosScalarTypeConfig = {
+  ): PothosSchemaTypes.ScalarRef<Types, InputShape<Types, Name>, ParentShape<Types, Name>> {
+    const ref = new ScalarRef<Types, InputShape<Types, Name>, ParentShape<Types, Name>>(name, {
       kind: 'Scalar',
       graphqlKind: 'Scalar',
       name,
@@ -539,9 +536,9 @@ export default class SchemaBuilder<Types extends SchemaTypes> {
       serialize: options.serialize as GraphQLScalarSerializer<OutputShape<Types, Name>>,
       pothosOptions: options as unknown as PothosSchemaTypes.ScalarTypeOptions,
       extensions: options.extensions,
-    };
+    });
 
-    this.configStore.addTypeConfig(config, ref);
+    this.configStore.addTypeRef(ref);
 
     return ref;
   }
@@ -590,18 +587,22 @@ export default class SchemaBuilder<Types extends SchemaTypes> {
         : param
     ) as PothosSchemaTypes.InputObjectRef<Types, InputShapeFromFields<Fields>>;
 
-    const config: PothosInputObjectTypeConfig = {
+    ref.updateConfig({
       kind: 'InputObject',
       graphqlKind: 'InputObject',
       name,
       description: options.description,
       pothosOptions: options as unknown as PothosSchemaTypes.InputObjectTypeOptions,
       extensions: options.extensions,
-    };
+    });
 
-    this.configStore.addTypeConfig(config, ref);
+    this.configStore.addTypeRef(ref);
 
-    this.configStore.addFields(ref, () =>
+    if (param !== ref && typeof param !== 'string') {
+      this.configStore.associateParamWithRef(param as ConfigurableRef<Types>, ref);
+    }
+
+    this.configStore.addInputFields(ref, () =>
       options.fields(new InputFieldBuilder(this, 'InputObject')),
     );
 
@@ -625,8 +626,9 @@ export default class SchemaBuilder<Types extends SchemaTypes> {
     const { directives, extensions } = options;
 
     const scalars = [GraphQLID, GraphQLInt, GraphQLFloat, GraphQLString, GraphQLBoolean];
+
     scalars.forEach((scalar) => {
-      if (!this.configStore.hasConfig(scalar.name as OutputType<Types>)) {
+      if (!this.configStore.hasImplementation(scalar.name)) {
         this.addScalarType(scalar.name as ScalarName<Types>, scalar, {});
       }
     });

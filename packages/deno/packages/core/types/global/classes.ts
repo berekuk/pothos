@@ -1,17 +1,17 @@
 // @ts-nocheck
-import type Builder from '../../builder.ts';
-import type InternalFieldBuilder from '../../fieldUtils/builder.ts';
-import type InternalInputFieldBuilder from '../../fieldUtils/input.ts';
-import type InternalRootFieldBuilder from '../../fieldUtils/root.ts';
-import type InternalBaseRef from '../../refs/base.ts';
-import type InternalEnumRef from '../../refs/enum.ts';
-import type InternalInputListRef from '../../refs/input-list.ts';
-import type InternalInputObjectRef from '../../refs/input-object.ts';
-import type InternalInterfaceRef from '../../refs/interface.ts';
-import type InternalListRef from '../../refs/list.ts';
-import type InternalObjectRef from '../../refs/object.ts';
-import type InternalScalarRef from '../../refs/scalar.ts';
-import type InternalUnionRef from '../../refs/union.ts';
+import type { SchemaBuilder as Builder } from '../../builder.ts';
+import type { FieldBuilder as InternalFieldBuilder } from '../../fieldUtils/builder.ts';
+import type { InputFieldBuilder as InternalInputFieldBuilder } from '../../fieldUtils/input.ts';
+import type { RootFieldBuilder as InternalRootFieldBuilder } from '../../fieldUtils/root.ts';
+import type { BaseTypeRef as InternalBaseRef } from '../../refs/base.ts';
+import type { EnumRef as InternalEnumRef } from '../../refs/enum.ts';
+import type { InputListRef as InternalInputListRef } from '../../refs/input-list.ts';
+import type { InputObjectRef as InternalInputObjectRef } from '../../refs/input-object.ts';
+import type { InterfaceRef as InternalInterfaceRef } from '../../refs/interface.ts';
+import type { ListRef as InternalListRef } from '../../refs/list.ts';
+import type { ObjectRef as InternalObjectRef } from '../../refs/object.ts';
+import type { ScalarRef as InternalScalarRef } from '../../refs/scalar.ts';
+import type { UnionRef as InternalUnionRef } from '../../refs/union.ts';
 import type { FieldKind } from '../builder-options.ts';
 import type { SchemaTypes } from '../schema-types.ts';
 declare global {
@@ -34,7 +34,7 @@ declare global {
         }
         export interface InputFieldBuilder<Types extends SchemaTypes, Kind extends "Arg" | "InputObject"> extends InternalInputFieldBuilder<Types, Kind> {
         }
-        export interface BaseTypeRef<Types extends SchemaTypes> extends InternalBaseRef<Types> {
+        export interface BaseTypeRef<Types extends SchemaTypes, T> extends InternalBaseRef<Types, T> {
         }
         export interface EnumRef<Types extends SchemaTypes, T, U = T> extends InternalEnumRef<Types, T, U> {
         }

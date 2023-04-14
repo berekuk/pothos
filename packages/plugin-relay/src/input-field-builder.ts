@@ -1,16 +1,5 @@
-import {
-  FieldRequiredness,
-  InputFieldBuilder,
-  InputFieldRef,
-  InputShapeFromTypeParam,
-  ObjectRef,
-  SchemaTypes,
-} from '@pothos/core';
-import {
-  GlobalIDInputFieldOptions,
-  GlobalIDInputShape,
-  GlobalIDListInputFieldOptions,
-} from './types';
+import { FieldRequiredness, InputFieldBuilder, ObjectRef, SchemaTypes } from '@pothos/core';
+import { GlobalIDInputFieldOptions, GlobalIDListInputFieldOptions } from './types';
 
 type DefaultSchemaTypes = PothosSchemaTypes.ExtendDefaultTypes<{}>;
 
@@ -66,25 +55,30 @@ inputFieldBuilder.globalID = function globalID<Req extends boolean>(
           parseId: 'parseId' in type ? type.parseId : undefined,
         })) ?? null,
     },
-  }) as unknown as InputFieldRef<
-    SchemaTypes,
-    InputShapeFromTypeParam<DefaultSchemaTypes, GlobalIDInputShape, Req>
-  > as never;
+  }) as never;
 };
 
 inputFieldBuilder.connectionArgs = function connectionArgs() {
-  const {
-    cursorType = 'String',
-    beforeArgOptions = {} as never,
-    afterArgOptions = {} as never,
-    firstArgOptions = {} as never,
-    lastArgOptions = {} as never,
-  } = this.builder.options.relay ?? {};
-
   return {
-    before: this.field({ ...beforeArgOptions, type: cursorType, required: false }),
-    after: this.field({ ...afterArgOptions, type: cursorType, required: false }),
-    first: this.int({ ...firstArgOptions, required: false }),
-    last: this.int({ ...lastArgOptions, required: false }),
+    before: this.field({
+      ...this.builder.options.relay?.beforeArgOptions,
+      type: this.builder.options.relay?.cursorType ?? 'String',
+      required: false,
+    }),
+    after: this.field({
+      ...this.builder.options.relay?.afterArgOptions,
+      type: this.builder.options.relay?.cursorType ?? 'String',
+      required: false,
+    }),
+    first: this.field({
+      ...this.builder.options.relay?.firstArgOptions,
+      type: 'Int',
+      required: false,
+    }),
+    last: this.field({
+      ...this.builder.options.relay?.lastArgOptions,
+      type: 'Int',
+      required: false,
+    }),
   };
 };

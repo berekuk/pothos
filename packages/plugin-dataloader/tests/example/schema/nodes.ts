@@ -26,7 +26,9 @@ builder.objectType(UserNode, {
 
 class ClassThing {
   id: number;
+
   name: string = 'some name';
+
   constructor(id = 123) {
     this.id = id;
   }
@@ -48,6 +50,7 @@ const ClassThingRef = builder.loadableNode(ClassThing, {
 
 class LoadableParseTest {
   readonly id: number;
+
   constructor(id: number) {
     if (typeof id !== 'number') {
       throw new TypeError(`Expected id to be a number, saw ${id}`);
@@ -105,8 +108,8 @@ builder.queryFields((t) => ({
   loadableParseNodes: t.field({
     type: [LoadableParseRef],
     args: {
-      ids: t.arg.globalIDList({ for: [LoadableParseRef] }),
+      ids: t.arg.globalIDList({ for: LoadableParseRef }),
     },
-    resolve: (source, args) => args.ids?.map((id) => id.id) ?? [],
+    resolve: (source, args) => args.ids?.map((id) => id.id) ?? ([] as any),
   }),
 }));

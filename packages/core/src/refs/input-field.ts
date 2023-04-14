@@ -1,50 +1,61 @@
-import type SchemaBuilder from '../builder';
 import { PothosSchemaError } from '../errors';
-import { inputFieldShapeKey, PothosFieldConfig, PothosTypeConfig, SchemaTypes } from '../types';
-import { inputTypeFromParam } from '../utils';
+import {
+  inputFieldShapeKey,
+  PothosInputFieldConfig,
+  PothosTypeConfig,
+  SchemaTypes,
+} from '../types';
 
-export default class InputFieldRef<Types extends SchemaTypes, T = unknown> {
-  builder: SchemaBuilder<Types>;
-
+export class InputFieldRef<Types extends SchemaTypes, T = unknown> {
   kind = 'InputObject' as const;
 
   fieldName?: string;
 
-  options: PothosSchemaTypes.InputObjectFieldOptions<Types> | null;
-
   [inputFieldShapeKey]!: T;
 
+  protected pendingActions: ((
+    config: PothosInputFieldConfig<Types>,
+  ) => PothosInputFieldConfig<Types> | void)[] = [];
+
+  private initConfig:
+    | ((name: string, typeConfig: PothosTypeConfig) => PothosInputFieldConfig<Types>)
+    | null;
+
+  private onUseCallbacks = new Set<(config: PothosInputFieldConfig<Types>) => void>();
+
   constructor(
-    builder: SchemaBuilder<Types>,
-
-    options: PothosSchemaTypes.InputObjectFieldOptions<Types> | null = null,
+    initConfig:
+      | ((name: string, typeConfig: PothosTypeConfig) => PothosInputFieldConfig<Types>)
+      | null,
   ) {
-    this.builder = builder;
-
-    this.options = options;
+    this.initConfig = initConfig;
   }
 
-  getConfig(name: string, typeConfig: PothosTypeConfig): PothosFieldConfig<Types> {
-    if (!this.options) {
+  updateConfig(
+    cb: (config: PothosInputFieldConfig<Types>) => PothosInputFieldConfig<Types> | void,
+  ) {
+    this.pendingActions.push(cb);
+  }
+
+  getConfig(name: string, typeConfig: PothosTypeConfig): PothosInputFieldConfig<Types> {
+    if (!this.initConfig) {
       throw new PothosSchemaError(`Field ${typeConfig.name}.${name} has not been implemented`);
     }
 
-    return {
-      name,
-      parentField: undefined,
-      kind: this.kind,
-      graphqlKind: this.kind,
-      parentType: typeConfig.name,
-      type: inputTypeFromParam<Types>(
-        this.options.type,
-        this.builder.configStore,
-        this.options.required ?? this.builder.defaultInputFieldRequiredness,
-      ),
-      pothosOptions: this.options,
-      description: this.options.description,
-      deprecationReason: this.options.deprecationReason,
-      defaultValue: this.options.defaultValue,
-      extensions: this.options.extensions,
-    };
+    const config = this.pendingActions.reduce(
+      (config, cb) => cb(config) ?? config,
+      this.initConfig(name, typeConfig),
+    );
+
+    for (const cb of this.onUseCallbacks) {
+      this.onUseCallbacks.delete(cb);
+      cb(config);
+    }
+
+    return config;
+  }
+
+  onFirstUse(cb: (config: PothosInputFieldConfig<Types>) => void) {
+    this.onUseCallbacks.add(cb);
   }
 }

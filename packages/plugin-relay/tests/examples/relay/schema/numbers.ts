@@ -150,13 +150,14 @@ builder.queryFields((t) => ({
 }));
 
 class AssociatingReturnTypeExample {
-  constructor(
-    // eslint-disable-next-line @typescript-eslint/no-parameter-properties
-    readonly config: {
-      edges: readonly { cursor: string; node: BatchLoadableNumberThing }[];
-      pageInfo: PageInfoShape;
-    },
-  ) {}
+  config;
+
+  constructor(config: {
+    edges: readonly { cursor: string; node: BatchLoadableNumberThing }[];
+    pageInfo: PageInfoShape;
+  }) {
+    this.config = config;
+  }
 
   get foo() {
     return 1;

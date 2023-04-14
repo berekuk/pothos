@@ -232,7 +232,7 @@ type QueryNamedConnectionEdge {
 }
 
 type QueryNullableUserConnection {
-  edges: [QueryNullableUserConnectionEdge]!
+  edges: [QueryNullableUserConnectionEdge]
   pageInfo: PageInfo!
 
   \\"\\"\\"default totalCount field for all connections\\"\\"\\"
@@ -531,7 +531,7 @@ type ViewerCommentsConnectionEdge {
 }
 
 type ViewerCommentsWithNewQueryConnection {
-  edges: [ViewerCommentsWithNewQueryConnectionEdge]!
+  edges: [ViewerCommentsWithNewQueryConnectionEdge]
   pageInfo: PageInfo!
 
   \\"\\"\\"default totalCount field for all connections\\"\\"\\"

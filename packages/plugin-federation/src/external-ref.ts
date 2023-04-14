@@ -4,7 +4,6 @@ import {
   InterfaceParam,
   MaybePromise,
   ObjectRef,
-  OutputTypeRef,
   RootFieldBuilder,
   SchemaTypes,
 } from '@pothos/core';
@@ -22,10 +21,10 @@ export class ExternalEntityRef<
   Types extends SchemaTypes,
   Shape extends object,
   Key extends Selection<object>,
-> extends OutputTypeRef<Types, Shape> {
+> extends ObjectRef<Types, Shape> {
   override kind = 'Object' as const;
 
-  private builder: PothosSchemaTypes.SchemaBuilder<Types>;
+  builder: PothosSchemaTypes.SchemaBuilder<Types>;
 
   private key: Key | Key[];
 
@@ -45,7 +44,7 @@ export class ExternalEntityRef<
       info: GraphQLResolveInfo,
     ) => MaybePromise<Shape | null | undefined>,
   ) {
-    super('Object', name);
+    super(name);
 
     this.builder = builder;
     this.key = key;
@@ -90,7 +89,7 @@ export class ExternalEntityRef<
     const ref = Object.create(this) as ExternalEntityRef<Types, Shape & T, Key>;
 
     providesMap.set(ref, selection);
-    this.builder.configStore.associateRefWithName(ref, this.name);
+    this.builder.configStore.associateParamWithRef(ref, this);
 
     return ref;
   }

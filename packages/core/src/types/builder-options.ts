@@ -1,8 +1,8 @@
 import type { GraphQLResolveInfo } from 'graphql';
-import type ArgumentRef from '../refs/arg';
-import type InputFieldRef from '../refs/input-field';
-import type InterfaceRef from '../refs/interface';
-import type ObjectRef from '../refs/object';
+import type { ArgumentRef } from '../refs/arg';
+import type { InputFieldRef } from '../refs/input-field';
+import type { InterfaceRef } from '../refs/interface';
+import type { ObjectRef } from '../refs/object';
 import type { SchemaTypes, VersionedSchemaBuilderOptions } from './schema-types';
 import type {
   BaseEnum,
@@ -31,7 +31,7 @@ export type AddVersionedDefaultsToBuilderOptions<
   Version extends keyof VersionedSchemaBuilderOptions<SchemaTypes>,
 > = PothosSchemaTypes.SchemaBuilderOptions<Types> extends infer Options
   ? VersionedSchemaBuilderOptions<Types>[Version] extends infer Defaults
-    ? RemoveNeverKeys<Omit<Options, keyof Defaults> & Defaults>
+    ? RemoveNeverKeys<Defaults & Omit<Options, keyof Defaults>>
     : never
   : never;
 
@@ -195,11 +195,11 @@ export type EnumTypeOptions<
     >
   : PothosSchemaTypes.EnumTypeOptions<Types, Values>;
 
-export type ArgBuilder<Types extends SchemaTypes> = PothosSchemaTypes.InputFieldBuilder<
-  Types,
-  'Arg'
->['field'] &
-  Omit<PothosSchemaTypes.InputFieldBuilder<Types, 'Arg'>, 'field'>;
+export type ArgBuilder<Types extends SchemaTypes> = Omit<
+  PothosSchemaTypes.InputFieldBuilder<Types, 'Arg'>,
+  'field'
+> &
+  PothosSchemaTypes.InputFieldBuilder<Types, 'Arg'>['field'];
 
 export type ValidateInterfaces<
   Shape,
@@ -218,7 +218,7 @@ export type InputShapeFromFields<Fields extends InputFieldMap> = NormalizeNullab
 export type InputFieldsFromShape<
   Types extends SchemaTypes,
   Shape,
-  Kind extends 'InputObject' | 'Arg',
+  Kind extends 'Arg' | 'InputObject',
 > = {
   [K in keyof Shape]: Kind extends 'Arg'
     ? ArgumentRef<Types, Shape[K]>
@@ -274,10 +274,10 @@ export type ExposeNullability<
   Nullable extends FieldNullability<Type>,
 > = Awaited<ParentShape[Name]> extends ShapeFromTypeParam<Types, Type, Nullable>
   ? {
-      nullable?: Nullable & ExposeNullableOption<Types, Type, ParentShape, Name>;
+      nullable?: ExposeNullableOption<Types, Type, ParentShape, Name> & Nullable;
     }
   : {
-      nullable: Nullable & ExposeNullableOption<Types, Type, ParentShape, Name>;
+      nullable: ExposeNullableOption<Types, Type, ParentShape, Name> & Nullable;
     };
 
 export type ExposeNullableOption<

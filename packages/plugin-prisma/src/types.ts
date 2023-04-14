@@ -832,8 +832,10 @@ export type PrismaConnectionShape<
       }
     : never
 ) extends infer C
-  ? [C] extends [{ edges: MaybePromise<readonly (infer Edge)[]> }]
-    ? Omit<C, 'edges'> & { edges: MaybePromise<(Edge & { connection: C })[]> }
+  ? [C] extends [
+      { edges: MaybePromise<readonly (infer Edge | null | undefined)[] | null | undefined> },
+    ]
+    ? Omit<C, 'edges'> & { edges: (Edge & { connection: C })[] }
     : C
   : never;
 

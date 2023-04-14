@@ -12,7 +12,6 @@ function defaultGetName({ parentTypeName, fieldName, }: {
 }
 rootBuilderProto.fieldWithInput = function fieldWithInput({ typeOptions: { name: typeName, ...typeOptions } = {}, argOptions: { name: argName = "input", ...argOptions } = {}, args, input, ...fieldOptions }) {
     const inputRef = this.builder.inputRef(typeName ?? `UnnamedWithInput`);
-    const { name: getTypeName = defaultGetName, ...defaultTypeOptions } = this.builder.options.withInput?.typeOptions ?? {};
     const fieldRef = this.field({
         args: {
             ...args,
@@ -25,14 +24,15 @@ rootBuilderProto.fieldWithInput = function fieldWithInput({ typeOptions: { name:
         },
         ...fieldOptions,
     } as never);
-    this.builder.configStore.onFieldUse(fieldRef, (config) => {
+    fieldRef.onFirstUse((config) => {
+        const { name: getTypeName = defaultGetName, ...defaultTypeOptions } = this.builder.options.withInput?.typeOptions ?? {};
         const name = typeName ?? getTypeName({ parentTypeName: config.parentType, fieldName: config.name });
-        this.builder.inputType(name, {
+        inputRef.name = name;
+        this.builder.inputType(inputRef, {
             fields: () => input,
             ...defaultTypeOptions,
             ...typeOptions,
         } as never);
-        this.builder.configStore.associateRefWithName(inputRef, name);
     });
     return fieldRef;
 };

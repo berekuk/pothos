@@ -119,7 +119,7 @@ export function prismaConnectionHelpers<
   return {
     ref: (typeof refOrType === 'string'
       ? getRefFromModel(refOrType, builder)
-      : refOrType) as PrismaRef<Types, Model>,
+      : refOrType) as PrismaRef<Types, Model, Model['Shape']>,
     resolve,
     select: options.select ?? {},
     getQuery,

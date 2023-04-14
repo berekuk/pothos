@@ -1,9 +1,9 @@
 // @ts-nocheck
 import type { GraphQLResolveInfo } from 'https://cdn.skypack.dev/graphql?dts';
-import type ArgumentRef from '../refs/arg.ts';
-import type InputFieldRef from '../refs/input-field.ts';
-import type InterfaceRef from '../refs/interface.ts';
-import type ObjectRef from '../refs/object.ts';
+import type { ArgumentRef } from '../refs/arg.ts';
+import type { InputFieldRef } from '../refs/input-field.ts';
+import type { InterfaceRef } from '../refs/interface.ts';
+import type { ObjectRef } from '../refs/object.ts';
 import type { SchemaTypes, VersionedSchemaBuilderOptions } from './schema-types.ts';
 import type { BaseEnum, EnumParam, FieldNullability, GenericFieldRef, GenericInputFieldRef, inputFieldShapeKey, InputRef, InterfaceParam, ObjectParam, ParentShape as GetParentShape, ShapeFromTypeParam, TypeParam, } from './type-params.ts';
 import type { MaybePromise, Merge, Normalize, NormalizeNullableFields, RemoveNeverKeys, } from './utils.ts';

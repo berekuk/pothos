@@ -14,6 +14,7 @@ proto.simpleObject = function simpleObject<Interfaces extends InterfaceParam<Sch
 =======
 proto.simpleObject = function simpleObject<Interfaces extends InterfaceParam<SchemaTypes>[], Fields extends FieldMap, Shape extends Normalize<OutputShapeFromFields<Fields> & ParentShape<SchemaTypes, Interfaces[number]>>>(name: string, options: PothosSchemaTypes.SimpleObjectTypeOptions<SchemaTypes, Interfaces, Fields, Shape>) {
     const ref = new ObjectRef<SchemaTypes, Shape>(name);
+<<<<<<< HEAD
 >>>>>>> 6f53ee9c (Add builder and SchemaTypes to field and type refs)
     if (options.fields) {
         const originalFields = options.fields;
@@ -31,6 +32,8 @@ proto.simpleObject = function simpleObject<Interfaces extends InterfaceParam<Sch
             return fields;
         };
     }
+=======
+>>>>>>> 6d6a3d23 (Refactor refs so configs and fields are stored on refs)
     this.objectType(ref, options as PothosSchemaTypes.ObjectTypeOptions);
     if (extraFields) {
         this.objectFields(ref, extraFields);
@@ -43,6 +46,7 @@ proto.simpleInterface = function simpleInterface<Fields extends FieldMap, Shape 
 =======
 proto.simpleInterface = function simpleInterface<Fields extends FieldMap, Shape extends OutputShapeFromFields<Fields>, Interfaces extends InterfaceParam<SchemaTypes>[]>(name: string, options: PothosSchemaTypes.SimpleInterfaceTypeOptions<SchemaTypes, Fields, Shape, Interfaces>) {
     const ref = new InterfaceRef<SchemaTypes, Shape>(name);
+<<<<<<< HEAD
 >>>>>>> 6f53ee9c (Add builder and SchemaTypes to field and type refs)
     if (options.fields) {
         const originalFields = options.fields;
@@ -60,6 +64,8 @@ proto.simpleInterface = function simpleInterface<Fields extends FieldMap, Shape 
             return fields;
         };
     }
+=======
+>>>>>>> 6d6a3d23 (Refactor refs so configs and fields are stored on refs)
     this.interfaceType(ref, options as {});
     if (extraFields) {
         this.interfaceFields(ref, extraFields);

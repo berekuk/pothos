@@ -50,7 +50,7 @@ export interface DefaultsByVersion {
 
 export interface DefaultScalars {
   String: { Input: string; Output: string };
-  ID: { Input: string; Output: number | string | bigint };
+  ID: { Input: string; Output: bigint | number | string };
   Int: { Input: number; Output: number };
   Float: { Input: number; Output: number };
   Boolean: { Input: boolean; Output: boolean };

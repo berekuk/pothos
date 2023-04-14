@@ -60,8 +60,8 @@ function addTypeSelectionsForField(
   };
 
   if (
-    (pothosPrismaIndirectInclude?.path && pothosPrismaIndirectInclude.path.length > 0) ||
-    (pothosPrismaIndirectInclude?.paths && pothosPrismaIndirectInclude.paths.length === 0)
+    (!!pothosPrismaIndirectInclude?.path && pothosPrismaIndirectInclude.path.length > 0) ||
+    (!!pothosPrismaIndirectInclude?.paths && pothosPrismaIndirectInclude.paths.length === 0)
   ) {
     resolveIndirectIncludePaths(
       type,
@@ -94,7 +94,7 @@ function addTypeSelectionsForField(
     state.mode = 'include';
   }
 
-  if (pothosPrismaInclude || pothosPrismaSelect) {
+  if (pothosPrismaInclude ?? pothosPrismaSelect) {
     mergeSelection(state, {
       select: pothosPrismaSelect ? { ...pothosPrismaSelect } : undefined,
       include: pothosPrismaInclude ? { ...pothosPrismaInclude } : undefined,
@@ -198,7 +198,7 @@ function resolveIndirectInclude(
 }
 
 function addNestedSelections(
-  type: GraphQLObjectType | GraphQLInterfaceType,
+  type: GraphQLInterfaceType | GraphQLObjectType,
   context: object,
   info: GraphQLResolveInfo,
   state: SelectionState,
@@ -260,7 +260,7 @@ function addNestedSelections(
 }
 
 function addFieldSelection(
-  type: GraphQLObjectType | GraphQLInterfaceType,
+  type: GraphQLInterfaceType | GraphQLObjectType,
   context: object,
   info: GraphQLResolveInfo,
   state: SelectionState,
@@ -316,8 +316,8 @@ function addFieldSelection(
         }
 
         if (
-          (normalizedIndirectInclude?.path && normalizedIndirectInclude.path.length > 0) ||
-          (normalizedIndirectInclude?.paths && normalizedIndirectInclude.paths.length > 0)
+          (!!normalizedIndirectInclude?.path && normalizedIndirectInclude.path.length > 0) ||
+          (!!normalizedIndirectInclude?.paths && normalizedIndirectInclude.paths.length > 0)
         ) {
           resolveIndirectIncludePaths(
             returnType,
@@ -397,7 +397,7 @@ export function queryFromInfo<T extends SelectionMap['select'] | undefined = und
   path?: string[];
   paths?: string[][];
   withUsageCheck?: boolean;
-}): { select: T } | { include?: {} } {
+}): { include?: {} } | { select: T } {
   const returnType = getNamedType(info.returnType);
   const type = typeName ? info.schema.getTypeMap()[typeName] : returnType;
 

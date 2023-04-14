@@ -1,27 +1,6 @@
 // @ts-nocheck
 import { defaultTypeResolver, GraphQLResolveInfo } from 'https://cdn.skypack.dev/graphql?dts';
-<<<<<<< HEAD
 import SchemaBuilder, { completeValue, createContextCache, FieldMap, FieldRef, getTypeBrand, InputObjectRef, InterfaceParam, InterfaceRef, MaybePromise, ObjectFieldsShape, ObjectParam, ObjectRef, OutputRef, PothosValidationError, SchemaTypes, verifyRef, } from '../core/index.ts';
-=======
-import SchemaBuilder, {
-  completeValue,
-  createContextCache,
-  FieldRef,
-  getTypeBrand,
-  InputObjectRef,
-  InterfaceParam,
-  InterfaceRef,
-  MaybePromise,
-  ObjectFieldsShape,
-  ObjectFieldThunk,
-  ObjectParam,
-  ObjectRef,
-  OutputRef,
-  PothosValidationError,
-  SchemaTypes,
-  verifyRef,
-} from '../core/index.ts';
->>>>>>> bc5c46910 (support versioned builder options and rename relayOptions to relay)
 import { NodeRef } from './node-ref.ts';
 import { ConnectionShape, GlobalIDShape, PageInfoShape } from './types.ts';
 import { capitalize, resolveNodes } from './utils/index.ts';
@@ -63,79 +42,55 @@ schemaBuilderProto.pageInfoRef = function pageInfoRef() {
     return ref;
 };
 schemaBuilderProto.nodeInterfaceRef = function nodeInterfaceRef() {
-  if (nodeInterfaceRefMap.has(this)) {
-    return nodeInterfaceRefMap.get(this)!;
-  }
-  const ref = this.interfaceRef<{}>('Node');
-  nodeInterfaceRefMap.set(this, ref);
-  ref.implement({
-    resolveType: (value, context, info, graphQLType) => {
-      if (!value) {
-        return defaultTypeResolver(value, context, info, graphQLType);
-      }
-      const typeBrand = getTypeBrand(value);
-      if (typeBrand) {
-        const type = this.configStore.getTypeConfig(typeBrand as string);
-        return type.name;
-      }
-      try {
-        if (typeof value === 'object') {
-          // eslint-disable-next-line no-underscore-dangle
-          const typename = (
-            value as {
-              __typename: string;
+    if (nodeInterfaceRefMap.has(this)) {
+        return nodeInterfaceRefMap.get(this)!;
+    }
+    const ref = this.interfaceRef<{}>("Node");
+    nodeInterfaceRefMap.set(this, ref);
+    ref.implement({
+        resolveType: (value, context, info, graphQLType) => {
+            if (!value) {
+                return defaultTypeResolver(value, context, info, graphQLType);
             }
-          ).__typename;
-          if (typename) {
-            return typename;
-          }
-          // eslint-disable-next-line no-underscore-dangle
-          const nodeRef = (
-            value as {
-              __type: OutputRef;
+            const typeBrand = getTypeBrand(value);
+            if (typeBrand) {
+                const type = this.configStore.getTypeConfig(typeBrand as string);
+                return type.name;
             }
-          ).__type;
-          if (nodeRef) {
-            const config = this.configStore.getTypeConfig(nodeRef);
-            if (config) {
-              return config.name;
+            try {
+                if (typeof value === "object") {
+                    // eslint-disable-next-line no-underscore-dangle
+                    const typename = (value as {
+                        __typename: string;
+                    }).__typename;
+                    if (typename) {
+                        return typename;
+                    }
+                    // eslint-disable-next-line no-underscore-dangle
+                    const nodeRef = (value as {
+                        __type: OutputRef;
+                    }).__type;
+                    if (nodeRef) {
+                        const config = this.configStore.getTypeConfig(nodeRef);
+                        if (config) {
+                            return config.name;
+                        }
+                    }
+                }
             }
-          }
-        }
-      } catch {
-        // ignore
-      }
-      return defaultTypeResolver(value, context, info, graphQLType);
-    },
-    ...this.options.relay?.nodeTypeOptions,
-    fields: (t) => ({
-      [this.options.relay?.idFieldName ?? 'id']: t.globalID({
-        ...this.options.relay?.idFieldOptions,
-        nullable: false,
-        resolve: (parent) => {
-          throw new PothosValidationError('id field not implemented');
+            catch {
+                // ignore
+            }
+            return defaultTypeResolver(value, context, info, graphQLType);
         },
-      }),
-    }),
-  });
-  const nodeQueryOptions = this.options.relay?.nodeQueryOptions;
-  if (nodeQueryOptions !== false) {
-    const resolveNodeFn = nodeQueryOptions?.resolve;
-    this.queryField(
-      'node',
-      (t) =>
-        t.field({
-          nullable: true,
-          ...this.options.relay?.nodeQueryOptions,
-          type: ref as InterfaceRef<unknown>,
-          args: {
-            id: t.arg.globalID({
-              ...nodeQueryOptions?.args?.id,
-              required: true,
-              extensions: {
-                relayGlobalIDAlwaysParse: true,
-                ...nodeQueryOptions?.args?.id?.extensions,
-              },
+        ...this.options.relay?.nodeTypeOptions,
+        fields: (t) => ({
+            [this.options.relay?.idFieldName ?? "id"]: t.globalID({
+                ...this.options.relay?.idFieldOptions,
+                nullable: false,
+                resolve: (parent) => {
+                    throw new PothosValidationError("id field not implemented");
+                },
             }),
         }),
     });
@@ -148,38 +103,24 @@ schemaBuilderProto.nodeInterfaceRef = function nodeInterfaceRef() {
             type: ref as InterfaceRef<SchemaTypes, unknown>,
             args: {
                 id: t.arg.globalID({
+                    ...nodeQueryOptions?.args?.id,
                     required: true,
                     extensions: {
                         relayGlobalIDAlwaysParse: true,
+                        ...nodeQueryOptions?.args?.id?.extensions,
                     },
                 }),
             },
             resolve: resolveNodeFn
                 ? (root, args, context, info) => resolveNodeFn(root, args as {
                     id: {
-                      id: string;
-                      typename: string;
+                        id: string;
+                        typename: string;
                     };
-                  },
-                  context,
-                  info,
-                  (ids) =>
-                    completeValue(
-                      resolveNodes(this, context, info, [
-                        args.id as {
-                          id: string;
-                          typename: string;
-                        },
-                      ]),
-                      (nodes) => nodes[0],
-                    ),
-                ) as never
-            : (root, args, context, info) =>
-                completeValue(
-                  resolveNodes(this, context, info, [
+                }, context, info, (ids) => completeValue(resolveNodes(this, context, info, [
                     args.id as {
-                      id: string;
-                      typename: string;
+                        id: string;
+                        typename: string;
                     },
                 ]), (nodes) => nodes[0])) as never
                 : (root, args, context, info) => completeValue(resolveNodes(this, context, info, [args.id as {
@@ -196,119 +137,103 @@ schemaBuilderProto.nodeInterfaceRef = function nodeInterfaceRef() {
                 list: false,
                 items: true,
             },
-          }),
-        },
-        resolve: resolveNodesFn
-          ? (root, args, context, info) =>
-              resolveNodesFn(
-                root,
-                args as {
-                  ids: {
+            ...this.options.relay?.nodesQueryOptions,
+            type: [ref],
+            args: {
+                ids: t.arg.globalIDList({
+                    ...nodesQueryOptions?.args?.ids,
+                    required: true,
+                    extensions: {
+                        relayGlobalIDAlwaysParse: true,
+                        ...nodesQueryOptions?.args?.ids?.extensions,
+                    },
+                }),
+            },
+            resolve: resolveNodesFn
+                ? (root, args, context, info) => resolveNodesFn(root, args as {
+                    ids: {
+                        id: string;
+                        typename: string;
+                    }[];
+                }, context, info, (ids) => resolveNodes(this, context, info, args.ids as {
                     id: string;
                     typename: string;
-                  }[];
-                },
-                context,
-                info,
-                (ids) =>
-                  resolveNodes(
-                    this,
-                    context,
-                    info,
-                    args.ids as {
-                      id: string;
-                      typename: string;
-                    }[],
-                  ),
-              ) as never
-          : (root, args, context, info) =>
-              resolveNodes(
-                this,
-                context,
-                info,
-                args.ids as {
-                  id: string;
-                  typename: string;
-                }[],
-              ) as never,
-      }),
-    );
-  }
-  return ref;
+                }[])) as never
+                : (root, args, context, info) => resolveNodes(this, context, info, args.ids as {
+                    id: string;
+                    typename: string;
+                }[]) as never,
+        }));
+    }
+    return ref;
 };
 schemaBuilderProto.node = function node(param, { interfaces, extensions, id, ...options }, fields) {
-  verifyRef(param);
-  const interfacesWithNode: () => InterfaceParam<SchemaTypes>[] = () => [
-    this.nodeInterfaceRef(),
-    ...(typeof interfaces === 'function' ? interfaces() : interfaces ?? []),
-  ];
-  let nodeName!: string;
-  const ref = this.objectType<[], ObjectParam<SchemaTypes>>(
-    param,
-    {
-      ...(options as {}),
-      extensions: {
-        ...extensions,
-        pothosParseGlobalID: id.parse,
-      },
-      isTypeOf:
-        options.isTypeOf ??
-        (typeof param === 'function'
-          ? (maybeNode: unknown, context: object, info: GraphQLResolveInfo) => {
-              if (!maybeNode) {
-                return false;
-              }
-              if (maybeNode instanceof (param as Function)) {
-                return true;
-              }
-              const proto = Object.getPrototypeOf(maybeNode) as {
-                constructor: unknown;
-              };
-              try {
-                if (proto?.constructor) {
-                  const config = this.configStore.getTypeConfig(proto.constructor as OutputRef);
-                  return config.name === nodeName;
+    verifyRef(param);
+    const interfacesWithNode: () => InterfaceParam<SchemaTypes>[] = () => [
+        this.nodeInterfaceRef(),
+        ...(typeof interfaces === "function" ? interfaces() : interfaces ?? []),
+    ];
+    let nodeName!: string;
+    const ref = this.objectType<[
+    ], ObjectParam<SchemaTypes>>(param, {
+        ...(options as {}),
+        extensions: {
+            ...extensions,
+            pothosParseGlobalID: id.parse,
+        },
+        isTypeOf: options.isTypeOf ??
+            (typeof param === "function"
+                ? (maybeNode: unknown, context: object, info: GraphQLResolveInfo) => {
+                    if (!maybeNode) {
+                        return false;
+                    }
+                    if (maybeNode instanceof (param as Function)) {
+                        return true;
+                    }
+                    const proto = Object.getPrototypeOf(maybeNode) as {
+                        constructor: unknown;
+                    };
+                    try {
+                        if (proto?.constructor) {
+                            const config = this.configStore.getTypeConfig(proto.constructor as OutputRef);
+                            return config.name === nodeName;
+                        }
+                    }
+                    catch {
+                        // ignore
+                    }
+                    return false;
                 }
-              } catch {
-                // ignore
-              }
-              return false;
-            }
-          : undefined),
-      interfaces: interfacesWithNode as () => [],
-    },
-    fields,
-  );
-  this.configStore.onTypeConfig(ref, (nodeConfig) => {
-    nodeName = nodeConfig.name;
-    this.objectField(ref, this.options.relay?.idFieldName ?? 'id', (t) =>
-      t.globalID<{}, false, MaybePromise<GlobalIDShape<SchemaTypes>>>({
-        nullable: false,
-        ...this.options.relay?.idFieldOptions,
-        ...id,
-        args: {},
-        resolve: (parent, args, context, info): MaybePromise<GlobalIDShape<SchemaTypes>> =>
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-          completeValue(id.resolve(parent, args, context, info), (globalId) => ({
-            type: nodeConfig.name,
-            id: globalId,
-          })),
-      }),
-    );
-  });
-  const nodeRef = new NodeRef(ref.name, {
-    parseId: id.parse,
-  });
-  this.configStore.associateRefWithName(nodeRef, ref.name);
-  return nodeRef as never;
+                : undefined),
+        interfaces: interfacesWithNode as () => [
+        ],
+    }, fields);
+    this.configStore.onTypeConfig(ref, (nodeConfig) => {
+        nodeName = nodeConfig.name;
+        this.objectField(ref, this.options.relay?.idFieldName ?? "id", (t) => t.globalID<{}, false, MaybePromise<GlobalIDShape<SchemaTypes>>>({
+            nullable: false,
+            ...this.options.relay?.idFieldOptions,
+            ...id,
+            args: {},
+            resolve: (parent, args, context, info): MaybePromise<GlobalIDShape<SchemaTypes>> => 
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+            completeValue(id.resolve(parent, args, context, info), (globalId) => ({
+                type: nodeConfig.name,
+                id: globalId,
+            })),
+        }));
+    });
+    const nodeRef = new NodeRef(ref.name, {
+        parseId: id.parse,
+    });
+    this.configStore.associateParamWithRef(nodeRef, ref);
+    return nodeRef as never;
 };
 schemaBuilderProto.globalConnectionField = function globalConnectionField(name, field) {
-<<<<<<< HEAD
-<<<<<<< HEAD
     this.globalConnectionFields((t) => ({ [name]: field(t) }));
 };
 schemaBuilderProto.globalConnectionFields = function globalConnectionFields(fields) {
-    const onRef = (ref: ObjectRef<ConnectionShape<SchemaTypes, unknown, boolean>>) => {
+    const onRef = (ref: ObjectRef<SchemaTypes, ConnectionShape<SchemaTypes, unknown, boolean>>) => {
         this.configStore.onPrepare(() => {
             const config = this.configStore.getTypeConfig(ref);
             this.objectFields(ref, (t) => {
@@ -322,56 +247,12 @@ schemaBuilderProto.globalConnectionFields = function globalConnectionFields(fiel
                 return refs;
             });
         });
-=======
-    const onRef = (ref: ObjectRef<SchemaTypes, ConnectionShape<SchemaTypes, unknown, boolean>>) => {
-        this.objectField(ref, name, field as ObjectFieldThunk<SchemaTypes, ConnectionShape<SchemaTypes, unknown, boolean>>);
->>>>>>> 99ee9cca3 (Add builder and SchemaTypes to field and type refs)
     };
     connectionRefs.get(this)?.forEach((ref) => void onRef(ref));
     if (!globalConnectionFieldsMap.has(this)) {
         globalConnectionFieldsMap.set(this, []);
     }
     globalConnectionFieldsMap.get(this)!.push(onRef);
-<<<<<<< HEAD
-=======
-  const onRef = (ref: ObjectRef<ConnectionShape<SchemaTypes, unknown, boolean>>) => {
-    this.objectField(
-      ref,
-      name,
-      field as ObjectFieldThunk<SchemaTypes, ConnectionShape<SchemaTypes, unknown, boolean>>,
-    );
-  };
-  connectionRefs.get(this)?.forEach((ref) => void onRef(ref));
-  if (!globalConnectionFieldsMap.has(this)) {
-    globalConnectionFieldsMap.set(this, []);
-  }
-  globalConnectionFieldsMap.get(this)!.push(onRef);
-};
-schemaBuilderProto.globalConnectionFields = function globalConnectionFields(fields) {
-  const onRef = (ref: ObjectRef<ConnectionShape<SchemaTypes, unknown, boolean>>) => {
-    this.objectFields(
-      ref,
-      fields as ObjectFieldsShape<SchemaTypes, ConnectionShape<SchemaTypes, unknown, boolean>>,
-    );
-  };
-  connectionRefs.get(this)?.forEach((ref) => void onRef(ref));
-  if (!globalConnectionFieldsMap.has(this)) {
-    globalConnectionFieldsMap.set(this, []);
-  }
-  globalConnectionFieldsMap.get(this)!.push(onRef);
->>>>>>> bc5c46910 (support versioned builder options and rename relayOptions to relay)
-=======
-};
-schemaBuilderProto.globalConnectionFields = function globalConnectionFields(fields) {
-    const onRef = (ref: ObjectRef<SchemaTypes, ConnectionShape<SchemaTypes, unknown, boolean>>) => {
-        this.objectFields(ref, fields as ObjectFieldsShape<SchemaTypes, ConnectionShape<SchemaTypes, unknown, boolean>>);
-    };
-    connectionRefs.get(this)?.forEach((ref) => void onRef(ref));
-    if (!globalConnectionFieldsMap.has(this)) {
-        globalConnectionFieldsMap.set(this, []);
-    }
-    globalConnectionFieldsMap.get(this)!.push(onRef);
->>>>>>> 99ee9cca3 (Add builder and SchemaTypes to field and type refs)
 };
 const mutationIdCache = createContextCache(() => new Map<string, string>());
 schemaBuilderProto.relayMutationField = function relayMutationField(fieldName, inputOptionsOrRef, { resolve, ...fieldOptions }, { name: payloadName = `${capitalize(fieldName)}Payload`, outputFields, interfaces, ...paylaodOptions }) {
@@ -418,53 +299,25 @@ schemaBuilderProto.relayMutationField = function relayMutationField(fieldName, i
                 : {}),
         }),
     });
-  }
-  const payloadRef = this.objectRef<unknown>(payloadName).implement({
-    ...this.options.relay?.defaultPayloadTypeOptions,
-    ...paylaodOptions,
-    interfaces: interfaces as never,
-    fields: (t) => ({
-      ...(outputFields as ObjectFieldsShape<SchemaTypes, unknown>)(t),
-      ...(includeClientMutationId
-        ? {
-            clientMutationId: t.id({
-              nullable: this.options.relay?.clientMutationId === 'optional',
-              ...clientMutationIdFieldOptions,
-              resolve: (parent, args, context, info) =>
-                mutationIdCache(context).get(String(info.path.prev!.key))!,
-            }),
-          }
-        : {}),
-    }),
-  });
-  this.mutationField(fieldName, (t) =>
-    t.field({
-      ...(fieldOptions as {}),
-      type: payloadRef,
-      args: {
-        [argName]: t.arg({ ...(mutationInputArgOptions as {}), type: inputRef, required: true }),
-      },
-      resolve: (root, args, context, info) => {
-        mutationIdCache(context).set(
-          String(info.path.key),
-          (
-            args as unknown as Record<
-              string,
-              {
+    this.mutationField(fieldName, (t) => t.field({
+        ...(fieldOptions as {}),
+        type: payloadRef,
+        args: {
+            [argName]: t.arg({ ...(mutationInputArgOptions as {}), type: inputRef, required: true }),
+        },
+        resolve: (root, args, context, info) => {
+            mutationIdCache(context).set(String(info.path.key), (args as unknown as Record<string, {
                 clientMutationId: string;
-              }
-            >
-          )[argName].clientMutationId,
-        );
-        return resolve(root, args as never, context, info);
-      },
-    }),
-  );
-  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-  return {
-    inputType: inputRef,
-    payloadType: payloadRef,
-  } as never;
+            }>)[argName]
+                .clientMutationId);
+            return resolve(root, args as never, context, info);
+        },
+    }));
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    return {
+        inputType: inputRef,
+        payloadType: payloadRef,
+    } as never;
 };
 schemaBuilderProto.connectionObject = function connectionObject({ type, name: connectionName, edgesNullable: edgesNullableField, nodeNullable, edgesField, ...connectionOptions }, edgeOptionsOrRef) {
     verifyRef(type);

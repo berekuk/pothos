@@ -1,4 +1,4 @@
-import ListRef from '../refs/list';
+import { ListRef } from '../refs/list';
 import type { ArgBuilder, InputFieldMap, NormalizeArgs, ShapeFromTypeParam } from '../types';
 import {
   FieldKind,
@@ -7,10 +7,10 @@ import {
   SchemaTypes,
   TypeParam,
 } from '../types';
-import BaseFieldUtil from './base';
-import InputFieldBuilder from './input';
+import { BaseFieldUtil } from './base';
+import { InputFieldBuilder } from './input';
 
-export default class RootFieldBuilder<
+export class RootFieldBuilder<
   Types extends SchemaTypes,
   ParentShape,
   Kind extends FieldKind = FieldKind,

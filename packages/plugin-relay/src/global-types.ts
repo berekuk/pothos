@@ -134,8 +134,8 @@ declare global {
       connectionObject: <
         Type extends OutputType<Types>,
         ResolveReturnShape,
-        EdgeNullability extends FieldNullability<[unknown]>,
-        NodeNullability extends boolean,
+        EdgeNullability extends FieldNullability<[unknown]> = Types['DefaultEdgesNullability'],
+        NodeNullability extends boolean = Types['DefaultNodeNullability'],
         ConnectionInterfaces extends InterfaceParam<Types>[] = [],
         EdgeInterfaces extends InterfaceParam<Types>[] = [],
       >(

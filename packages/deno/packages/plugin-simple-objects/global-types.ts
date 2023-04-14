@@ -14,8 +14,12 @@ declare global {
             simpleInterface: <Fields extends FieldMap, Shape extends OutputShapeFromFields<Fields>, Interfaces extends InterfaceParam<SchemaTypes>[]>(name: string, options: SimpleInterfaceTypeOptions<Types, Fields, Shape, Interfaces>, fields?: InterfaceFieldsShape<Types, Shape>) => InterfaceRef<Shape>;
 =======
             simpleObject: <Interfaces extends InterfaceParam<Types>[], Fields extends FieldMap, Shape extends Normalize<OutputShapeFromFields<Fields> & ParentShape<Types, Interfaces[number]>>>(name: string, options: SimpleObjectTypeOptions<Types, Interfaces, Fields, Shape>) => ObjectRef<Types, Shape>;
+<<<<<<< HEAD
             simpleInterface: <Fields extends FieldMap, Shape extends OutputShapeFromFields<Fields>, Interfaces extends InterfaceParam<SchemaTypes>[]>(name: string, options: SimpleInterfaceTypeOptions<Types, Fields, Shape, Interfaces>) => InterfaceRef<Types, Shape>;
 >>>>>>> 6f53ee9c (Add builder and SchemaTypes to field and type refs)
+=======
+            simpleInterface: <Fields extends FieldMap, Shape extends OutputShapeFromFields<Fields>, Interfaces extends InterfaceParam<Types>[]>(name: string, options: SimpleInterfaceTypeOptions<Types, Fields, Shape, Interfaces>) => InterfaceRef<Types, Shape>;
+>>>>>>> 6d6a3d23 (Refactor refs so configs and fields are stored on refs)
         }
         export interface PothosKindToGraphQLType {
             SimpleObject: "Object";
@@ -28,7 +32,7 @@ declare global {
         export type SimpleObjectTypeOptions<Types extends SchemaTypes, Interfaces extends InterfaceParam<Types>[], Fields extends FieldMap, Shape> = Omit<ObjectTypeOptions<Types, Shape> | ObjectTypeWithInterfaceOptions<Types, Shape, Interfaces>, "fields"> & {
             fields?: SimpleObjectFieldsShape<Types, Fields>;
         };
-        export interface SimpleInterfaceTypeOptions<Types extends SchemaTypes, Fields extends FieldMap, Shape extends OutputShapeFromFields<Fields>, Interfaces extends InterfaceParam<SchemaTypes>[]> extends Omit<InterfaceTypeOptions<Types, Shape, Interfaces>, "args" | "fields"> {
+        export interface SimpleInterfaceTypeOptions<Types extends SchemaTypes, Fields extends FieldMap, Shape extends OutputShapeFromFields<Fields>, Interfaces extends InterfaceParam<Types>[]> extends Omit<InterfaceTypeOptions<Types, Shape, Interfaces>, "args" | "fields"> {
             fields?: SimpleObjectFieldsShape<Types, Fields>;
         }
     }

@@ -1,7 +1,8 @@
-import type ArgumentRef from '../refs/arg';
-import type InputFieldRef from '../refs/input-field';
-import type InterfaceRef from '../refs/interface';
-import type ObjectRef from '../refs/object';
+import type { ArgumentRef } from '../refs/arg';
+import { BaseTypeRef } from '../refs/base';
+import type { InputFieldRef } from '../refs/input-field';
+import type { InterfaceRef } from '../refs/interface';
+import type { ObjectRef } from '../refs/object';
 import type { RootName, SchemaTypes } from './schema-types';
 
 export const outputShapeKey = Symbol.for('Pothos.outputShapeKey');
@@ -79,7 +80,7 @@ export interface OutputRef<T = unknown> {
 export interface InputRef<T = unknown> {
   [inputShapeKey]: T;
   name: string;
-  kind: 'Enum' | 'InputObject' | 'Scalar' | 'InputList';
+  kind: 'Enum' | 'InputList' | 'InputObject' | 'Scalar';
 }
 
 export type OutputType<Types extends SchemaTypes> =
@@ -99,6 +100,7 @@ export type InputType<Types extends SchemaTypes> =
     };
 
 export type ConfigurableRef<Types extends SchemaTypes> =
+  | BaseTypeRef<Types, unknown>
   | InputType<Types>
   | OutputType<Types>
   | RootName;

@@ -1,121 +1,62 @@
-import { defaultFieldResolver } from 'graphql';
-import type SchemaBuilder from '../builder';
 import { PothosSchemaError } from '../errors';
 import {
   FieldKind,
-  FieldNullability,
-  FieldOptionsFromKind,
-  InputFieldMap,
   outputFieldShapeKey,
-  PothosFieldConfig,
-  PothosInputFieldConfig,
+  PothosOutputFieldConfig,
   PothosTypeConfig,
   SchemaTypes,
-  TypeParam,
 } from '../types';
-import { typeFromParam } from '../utils';
 
-export default class FieldRef<
-  Types extends SchemaTypes,
-  T = unknown,
-  Kind extends FieldKind = FieldKind,
-> {
-  builder: SchemaBuilder<Types>;
-
+export class FieldRef<Types extends SchemaTypes, T = unknown, Kind extends FieldKind = FieldKind> {
   kind: FieldKind;
-
-  fieldName?: string;
 
   [outputFieldShapeKey]!: T;
 
-  private options: FieldOptionsFromKind<
-    Types,
-    unknown,
-    TypeParam<Types>,
-    FieldNullability<TypeParam<Types>>,
-    InputFieldMap,
-    Kind,
-    unknown,
-    unknown
-  > | null;
+  protected pendingActions: ((
+    config: PothosOutputFieldConfig<Types>,
+  ) => PothosOutputFieldConfig<Types> | void)[] = [];
+
+  private initConfig:
+    | ((name: string, typeConfig: PothosTypeConfig) => PothosOutputFieldConfig<Types>)
+    | null;
+
+  private onUseCallbacks = new Set<(config: PothosOutputFieldConfig<Types>) => void>();
 
   constructor(
-    builder: SchemaBuilder<Types>,
     kind: Kind,
-    options: FieldOptionsFromKind<
-      Types,
-      T,
-      TypeParam<Types>,
-      FieldNullability<TypeParam<Types>>,
-      InputFieldMap,
-      Kind,
-      unknown,
-      unknown
-    > | null = null,
+    initConfig:
+      | ((name: string, typeConfig: PothosTypeConfig) => PothosOutputFieldConfig<Types>)
+      | null = null,
   ) {
-    this.builder = builder;
     this.kind = kind;
-    // TODO: figure out how to make this non-generic while still being compatible with FieldMaps
-    this.options = options as never;
+    this.initConfig = initConfig;
   }
 
-  getConfig(name: string, typeConfig: PothosTypeConfig): PothosFieldConfig<Types> {
-    const { options } = this;
-    if (!options) {
+  updateConfig(
+    cb: (config: PothosOutputFieldConfig<Types>) => PothosOutputFieldConfig<Types> | void,
+  ) {
+    this.pendingActions.push(cb);
+  }
+
+  getConfig(name: string, typeConfig: PothosTypeConfig): PothosOutputFieldConfig<Types> {
+    if (!this.initConfig) {
       throw new PothosSchemaError(`Field ${typeConfig.name}.${name} has not been implemented`);
     }
 
-    const args: Record<string, PothosInputFieldConfig<Types>> = {};
+    const config = this.pendingActions.reduce(
+      (cfg, cb) => cb(cfg) ?? cfg,
+      this.initConfig(name, typeConfig),
+    );
 
-    if (options.args) {
-      Object.keys(options.args).forEach((argName) => {
-        const argRef = options.args![argName];
-
-        args[argName] = this.builder.configStore.createFieldConfig(
-          argRef,
-          argName,
-          typeConfig,
-          name,
-          'Arg',
-        );
-      });
+    for (const cb of this.onUseCallbacks) {
+      this.onUseCallbacks.delete(cb);
+      cb(config);
     }
 
-    let resolve =
-      (options as { resolve?: (...argList: unknown[]) => unknown }).resolve ??
-      (() => {
-        throw new PothosSchemaError(
-          `Not implemented: No resolver found for ${typeConfig.name}.${name}`,
-        );
-      });
+    return config;
+  }
 
-    if (options.extensions?.pothosExposedField === name) {
-      resolve = defaultFieldResolver as typeof resolve;
-    }
-
-    const { subscribe } = options as { subscribe?: (...argList: unknown[]) => unknown };
-
-    return {
-      kind: this.kind as never,
-      graphqlKind: typeConfig.graphqlKind as 'Object' | 'Interface',
-      parentType: typeConfig.name,
-      name,
-      args,
-      type: typeFromParam(
-        options.type,
-        this.builder.configStore,
-        options.nullable ?? this.builder.defaultFieldNullability,
-      ),
-      pothosOptions: options as never,
-      extensions: {
-        pothosOriginalResolve: resolve,
-        pothosOriginalSubscribe: subscribe,
-        ...options.extensions,
-      },
-      description: options.description,
-      deprecationReason: options.deprecationReason,
-      resolve,
-      subscribe,
-    };
+  onFirstUse(cb: (config: PothosOutputFieldConfig<Types>) => void) {
+    this.onUseCallbacks.add(cb);
   }
 }

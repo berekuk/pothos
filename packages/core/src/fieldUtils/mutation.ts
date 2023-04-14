@@ -1,10 +1,11 @@
 import { SchemaTypes } from '../types';
-import RootFieldBuilder from './root';
+import { RootFieldBuilder } from './root';
 
-export default class MutationFieldBuilder<
-  Types extends SchemaTypes,
+export class MutationFieldBuilder<Types extends SchemaTypes, ParentShape> extends RootFieldBuilder<
+  Types,
   ParentShape,
-> extends RootFieldBuilder<Types, ParentShape, 'Mutation'> {
+  'Mutation'
+> {
   constructor(builder: PothosSchemaTypes.SchemaBuilder<Types>) {
     super(builder, 'Mutation', 'Object');
   }

@@ -1,12 +1,7 @@
 // @ts-nocheck
 import './global-types.ts';
-<<<<<<< HEAD
 import { defaultFieldResolver, getNamedType, GraphQLEnumType, GraphQLInputObjectType, GraphQLInputType, GraphQLInterfaceType, GraphQLNamedInputType, GraphQLNamedOutputType, GraphQLObjectType, GraphQLOutputType, GraphQLUnionType, isListType, isNonNullType, } from 'https://cdn.skypack.dev/graphql?dts';
-import SchemaBuilder, { EnumRef, EnumValueConfigMap, InputFieldRef, InputType, InputTypeParam, ObjectParam, ObjectRef, OutputType, SchemaTypes, TypeParam, } from '../core/index.ts';
-=======
-import { defaultFieldResolver, getNamedType, GraphQLEnumType, GraphQLInputObjectType, GraphQLInputType, GraphQLInterfaceType, GraphQLNamedInputType, GraphQLNamedOutputType, GraphQLNamedType, GraphQLObjectType, GraphQLOutputType, GraphQLUnionType, isEnumType, isInputObjectType, isInterfaceType, isListType, isNonNullType, isObjectType, isScalarType, isUnionType, } from 'https://cdn.skypack.dev/graphql?dts';
-import SchemaBuilder, { ArgumentRef, createContextCache, EnumRef, EnumValueConfigMap, InputFieldRef, InputType, InputTypeParam, ObjectParam, ObjectRef, OutputType, SchemaTypes, TypeParam, } from '../core/index.ts';
->>>>>>> 99ee9cca3 (Add builder and SchemaTypes to field and type refs)
+import SchemaBuilder, { ArgumentRef, EnumRef, EnumValueConfigMap, InputFieldRef, InputType, InputTypeParam, ObjectParam, ObjectRef, OutputType, SchemaTypes, TypeParam, } from '../core/index.ts';
 import { AddGraphQLEnumTypeOptions, AddGraphQLInputTypeOptions, AddGraphQLInterfaceTypeOptions, AddGraphQLObjectTypeOptions, AddGraphQLUnionTypeOptions, EnumValuesWithShape, } from './types.ts';
 import { addReferencedType } from './utils.ts';
 const proto = SchemaBuilder.prototype as PothosSchemaTypes.SchemaBuilder<SchemaTypes>;
@@ -167,6 +162,7 @@ proto.addGraphQLInterface = function addGraphQLInterface<Shape = unknown>(type: 
     return ref;
 };
 proto.addGraphQLUnion = function addGraphQLUnion<Shape>(type: GraphQLUnionType, { types, extensions, ...options }: AddGraphQLUnionTypeOptions<SchemaTypes, ObjectRef<SchemaTypes, Shape>>) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return this.unionType<ObjectParam<SchemaTypes>, Shape>(options?.name ?? type.name, {
         ...options,
         description: type.description ?? undefined,
@@ -195,8 +191,13 @@ proto.addGraphQLEnum = function addGraphQLEnum<Shape extends string | number>(ty
     } as never);
     return ref;
 };
+<<<<<<< HEAD
 proto.addGraphQLInput = function addGraphQLInput<Shape extends {}>(type: GraphQLInputObjectType, { name = type.name, fields, extensions, ...options }: AddGraphQLInputTypeOptions<SchemaTypes, Shape>) {
     const ref = this.inputRef<never>(name);
+=======
+proto.addGraphQLInput = function addGraphQLInput<Shape extends {}>(type: GraphQLInputObjectType, { name = type.name, fields, extensions, ...options }: AddGraphQLInputTypeOptions<SchemaTypes, Shape>): PothosSchemaTypes.InputObjectRef<SchemaTypes, Shape> {
+    const ref = this.inputRef<Shape>(name);
+>>>>>>> 6d6a3d23 (Refactor refs so configs and fields are stored on refs)
     return ref.implement({
         ...options,
         description: type.description ?? undefined,

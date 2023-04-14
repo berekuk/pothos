@@ -36,7 +36,7 @@ declare global {
       simpleInterface: <
         Fields extends FieldMap,
         Shape extends OutputShapeFromFields<Fields>,
-        Interfaces extends InterfaceParam<SchemaTypes>[],
+        Interfaces extends InterfaceParam<Types>[],
       >(
         name: string,
         options: SimpleInterfaceTypeOptions<Types, Fields, Shape, Interfaces>,
@@ -84,7 +84,7 @@ declare global {
       Types extends SchemaTypes,
       Fields extends FieldMap,
       Shape extends OutputShapeFromFields<Fields>,
-      Interfaces extends InterfaceParam<SchemaTypes>[],
+      Interfaces extends InterfaceParam<Types>[],
     > extends Omit<InterfaceTypeOptions<Types, Shape, Interfaces>, 'args' | 'fields'> {
       fields?: SimpleObjectFieldsShape<Types, Fields>;
     }
