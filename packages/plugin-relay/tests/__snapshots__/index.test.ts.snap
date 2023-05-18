@@ -271,8 +271,8 @@ type SharedEdge {
 
 exports[`relay example schema > generates expected schema with additional interfaces 1`] = `
 "type Customer implements Node & User {
-  age: Int!
-  displayName: String!
+  age: Int
+  displayName: String
   id: ID!
 }
 
@@ -293,7 +293,7 @@ type Query {
 
   \\"\\"\\"nodes query\\"\\"\\"
   nodes(ids: [ID!]!): [Node]!
-  nullConnection(after: String, before: String, first: Int, last: Int): QueryNullConnection!
+  nullConnection(after: String, before: String, first: Int, last: Int): QueryNullConnection
 }
 
 type QueryNullConnection {
@@ -307,21 +307,21 @@ type QueryNullConnectionEdge {
 }
 
 interface User {
-  displayName: String!
-  id: ID!
+  displayName: String
+  id: ID
 }"
 `;
 
 exports[`relay example schema > generates expected schema with globalConnectionFields 1`] = `
 "type Answer {
-  count: Int!
-  id: ID!
-  value: String!
+  count: Int
+  id: ID
+  value: String
 }
 
 type BatchNumber implements Node {
   nodeId: ID!
-  number: Int!
+  number: Int
 }
 
 \\"\\"\\"input type\\"\\"\\"
@@ -331,7 +331,7 @@ input CustomInputName {
 
 \\"\\"\\"output type\\"\\"\\"
 type CustomOutputName {
-  itWorked: Boolean!
+  itWorked: Boolean
 }
 
 input ExampleMutationInput {
@@ -339,7 +339,7 @@ input ExampleMutationInput {
 }
 
 type ExampleMutationPayload {
-  itWorked: Boolean!
+  itWorked: Boolean
 }
 
 input GlobalIDInput {
@@ -350,18 +350,18 @@ input GlobalIDInput {
 }
 
 type Mutation {
-  answerPoll(answer: Int!, id: ID!): Poll!
-  createPoll(answers: [String!]!, question: String!): Poll!
+  answerPoll(answer: Int!, id: ID!): Poll
+  createPoll(answers: [String!]!, question: String!): Poll
   exampleMutation(
     \\"\\"\\"mutation input arg\\"\\"\\"
     input: ExampleMutationInput!
-  ): ExampleMutationPayload!
+  ): ExampleMutationPayload
 
   \\"\\"\\"mutation field\\"\\"\\"
   exampleWithDescriptions(
     \\"\\"\\"mutation input arg\\"\\"\\"
     customInput: CustomInputName!
-  ): CustomOutputName!
+  ): CustomOutputName
 }
 
 input NoGlobalIDInput {
@@ -376,7 +376,7 @@ interface Node {
 
 type Number implements Node {
   nodeId: ID!
-  number: Int!
+  number: Int
 }
 
 \\"\\"\\"page info type\\"\\"\\"
@@ -388,13 +388,13 @@ type PageInfo {
 }
 
 type Poll implements Node {
-  answers: [Answer!]!
-  answersConnection(after: String, before: String, first: Int, last: Int): PollAnswersConnection!
-  answersUsingOffset(after: String, before: String, first: Int, last: Int): PollAnswersUsingOffsetConnection!
-  answersWithoutHelpers(after: String, before: String, first: Int, last: Int): PollAnswersCon!
+  answers: [Answer!]
+  answersConnection(after: String, before: String, first: Int, last: Int): PollAnswersConnection
+  answersUsingOffset(after: String, before: String, first: Int, last: Int): PollAnswersUsingOffsetConnection
+  answersWithoutHelpers(after: String, before: String, first: Int, last: Int): PollAnswersCon
   nodeId: ID!
-  question: String!
-  updatedAt: String!
+  question: String
+  updatedAt: String
 }
 
 type PollAnswersCon {
@@ -437,17 +437,17 @@ type PollAnswersUsingOffsetConnectionEdge {
 }
 
 type Query {
-  batchNumbers(after: String, before: String, first: Int, last: Int): QueryBatchNumbersConnection!
+  batchNumbers(after: String, before: String, first: Int, last: Int): QueryBatchNumbersConnection
   extraNode: Node
-  inputGlobalID(id: ID!, inputObj: GlobalIDInput!, normalId: ID!): String!
+  inputGlobalID(id: ID!, inputObj: GlobalIDInput!, normalId: ID!): String
   moreNodes: [Node]!
   nullableNumbers(after: String, before: String, first: Int, last: Int): QueryNullableNumbersConnection
-  numbers(after: String, before: String, first: Int, last: Int): QueryNumbersConnection!
-  oddNumbers(after: String, before: String, first: Int, last: Int): QueryOddNumbersConnection!
+  numbers(after: String, before: String, first: Int, last: Int): QueryNumbersConnection
+  oddNumbers(after: String, before: String, first: Int, last: Int): QueryOddNumbersConnection
   poll(id: Int!): Poll
-  pollIds: [ID!]!
-  polls: [Poll!]!
-  pollsConnection(after: String, before: String, first: Int, last: Int): QueryPollsConnection!
+  pollIds: [ID!]
+  polls: [Poll!]
+  pollsConnection(after: String, before: String, first: Int, last: Int): QueryPollsConnection
   sharedConnection(after: String, before: String, first: Int, last: Int): SharedConnection
 }
 
@@ -467,7 +467,7 @@ type QueryBatchNumbersConnectionEdge {
 type QueryNullableNumbersConnection {
   edges: [QueryNullableNumbersConnectionEdge!]!
   nodes: [Number]!
-  other: String!
+  other: String
   pageInfo: PageInfo!
   totalCount: Int!
   totalCount2: Int!
@@ -481,7 +481,7 @@ type QueryNullableNumbersConnectionEdge {
 type QueryNumbersConnection {
   edges: [QueryNumbersConnectionEdge!]!
   nodes: [Number]!
-  other: String!
+  other: String
   pageInfo: PageInfo!
   totalCount: Int!
   totalCount2: Int!
@@ -507,7 +507,7 @@ type QueryOddNumbersConnectionEdge {
 
 type QueryPollsConnection {
   edges: [QueryPollsConnectionEdge!]!
-  extraConnectionField: String!
+  extraConnectionField: String
   nodes: [Poll]!
   pageInfo: PageInfo!
   totalCount: Int!
@@ -516,7 +516,7 @@ type QueryPollsConnection {
 
 type QueryPollsConnectionEdge {
   cursor: String!
-  extraEdgeField: Int!
+  extraEdgeField: Int
   node: Poll
 }
 

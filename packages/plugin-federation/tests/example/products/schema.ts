@@ -4,7 +4,6 @@ import DirectivesPlugin from '@pothos/plugin-directives';
 import FederationPlugin from '../../../src';
 
 const builder = new SchemaBuilder<{
-  DefaultFieldNullability: true;
   Directives: {
     custom: {
       locations: 'INTERFACE' | 'OBJECT';
@@ -23,7 +22,6 @@ const builder = new SchemaBuilder<{
   directives: {
     useGraphQLToolsUnorderedDirectives: true,
   },
-  defaultFieldNullability: true,
 });
 
 interface Product {

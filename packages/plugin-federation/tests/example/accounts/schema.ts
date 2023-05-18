@@ -9,7 +9,6 @@ const builder = new SchemaBuilder<{
   directives: {
     useGraphQLToolsUnorderedDirectives: true,
   },
-  defaultFieldNullability: true,
 });
 
 interface User {

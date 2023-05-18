@@ -191,9 +191,7 @@ import { normalizeEnumValues, valuesFromEnum, verifyInterfaces, verifyRef } from
 export class SchemaBuilder<Types extends SchemaTypes> {
     static plugins: Partial<PluginConstructorMap<SchemaTypes>> = {};
     static optionNormalizers: Map<string, {
-        v3?: (options: NormalizeSchemeBuilderOptions<SchemaTypes & {
-            Defaults: "v3";
-        }>) => Partial<NormalizeSchemeBuilderOptions<SchemaTypes>>;
+        v3?: (options: AddVersionedDefaultsToBuilderOptions<SchemaTypes, "v3">) => Partial<NormalizeSchemeBuilderOptions<SchemaTypes>>;
         v4?: undefined;
     }> = new Map();
     static allowPluginReRegistration = false;
@@ -204,12 +202,11 @@ export class SchemaBuilder<Types extends SchemaTypes> {
     constructor(options: PothosSchemaTypes.SchemaBuilderOptions<Types>) {
         this.options = [...SchemaBuilder.optionNormalizers.values()].reduce((opts, normalize) => {
             if (options.defaults && typeof normalize[options.defaults] === "function") {
+                // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
                 return {
                     ...opts,
-                    ...normalize[options.defaults]!(opts as NormalizeSchemeBuilderOptions<SchemaTypes & {
-                        Defaults: "v3";
-                    }>),
-                };
+                    ...normalize[options.defaults]!(opts),
+                } as PothosSchemaTypes.SchemaBuilderOptions<Types>;
             }
             return opts;
         }, options);
@@ -217,7 +214,9 @@ export class SchemaBuilder<Types extends SchemaTypes> {
         this.defaultFieldNullability =
             (options as {
                 defaultFieldNullability?: boolean;
-            }).defaultFieldNullability ?? false;
+            }).defaultFieldNullability ??
+                // eslint-disable-next-line no-unneeded-ternary
+                (options.defaults === "v3" ? false : true);
         this.defaultInputFieldRequiredness =
             (options as {
                 defaultInputFieldRequiredness?: boolean;

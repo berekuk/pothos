@@ -2,14 +2,11 @@ import SchemaBuilder from '@pothos/core';
 import DirectivesPlugin from '@pothos/plugin-directives';
 import FederationPlugin from '../../../src';
 
-const builder = new SchemaBuilder<{
-  DefaultFieldNullability: true;
-}>({
+const builder = new SchemaBuilder({
   plugins: [DirectivesPlugin, FederationPlugin],
   directives: {
     useGraphQLToolsUnorderedDirectives: true,
   },
-  defaultFieldNullability: true,
 });
 
 interface Review {

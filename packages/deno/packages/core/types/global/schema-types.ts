@@ -8,7 +8,7 @@ declare global {
     export namespace PothosSchemaTypes {
         export interface SchemaBuilderOptions<Types extends SchemaTypes> {
             plugins?: (keyof PluginConstructorMap<Types>)[];
-            defaultFieldNullability: false extends Types["DefaultFieldNullability"] ? never : Types["DefaultFieldNullability"];
+            defaultFieldNullability: Types["Defaults"] extends "v3" ? false extends Types["DefaultFieldNullability"] ? never : Types["DefaultFieldNullability"] : true extends Types["DefaultFieldNullability"] ? never : Types["DefaultFieldNullability"];
             defaultInputFieldRequiredness: false extends Types["DefaultInputFieldRequiredness"] ? never : Types["DefaultInputFieldRequiredness"];
             notStrict: IsStrictMode extends true ? never : "Pothos may not work correctly when strict mode is not enabled in tsconfig.json";
             defaults: SchemaTypes["Defaults"] extends Types["Defaults"] ? never : Types["Defaults"];
@@ -56,7 +56,7 @@ declare global {
             Interfaces: PartialTypes["Interfaces"] & {};
             Root: PartialTypes["Root"] & {};
             Context: PartialTypes["Context"] & {};
-            DefaultFieldNullability: PartialTypes["DefaultFieldNullability"] extends true ? true : false;
+            DefaultFieldNullability: PartialTypes["Defaults"] extends "v3" ? PartialTypes["DefaultFieldNullability"] extends true ? true : false : PartialTypes["DefaultFieldNullability"] extends false ? false : true;
             DefaultInputFieldRequiredness: PartialTypes["DefaultInputFieldRequiredness"] extends true ? true : false;
             outputShapes: {
                 [K in keyof MergedScalars<PartialTypes>]: MergedScalars<PartialTypes>[K] extends {

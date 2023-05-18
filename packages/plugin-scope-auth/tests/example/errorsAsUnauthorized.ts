@@ -41,7 +41,6 @@ const builder = new SchemaBuilder<{
   DefaultFieldNullability: true;
 }>({
   relay: {},
-  defaultFieldNullability: true,
   scopeAuth: {
     treatErrorsAsUnauthorized: true,
     unauthorizedError: (parent, context, info, result) => {
