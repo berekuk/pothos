@@ -1,0 +1,5 @@
+{
+  "schema": "./tests/example/db/schema.ts",
+  "out": "./tests/drizzle",
+  "connectionString": "file:./tests/example/db/dev.db"
+}
