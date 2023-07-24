@@ -38,14 +38,8 @@ export class ImplementableInputObjectRef<Types extends SchemaTypes, T extends ob
         super(name);
         this.builder = builder;
     }
-<<<<<<< HEAD
-    implement(options: PothosSchemaTypes.InputObjectTypeOptions<Types, InputFieldsFromShape<RecursivelyNormalizeNullableFields<T>>>) {
-        this.builder.inputType<ImplementableInputObjectRef<Types, T>, InputFieldsFromShape<RecursivelyNormalizeNullableFields<T>>>(this, options);
-        return this as InputObjectRef<RecursivelyNormalizeNullableFields<T>>;
-=======
     implement(options: PothosSchemaTypes.InputObjectTypeOptions<Types, InputFieldsFromShape<Types, RecursivelyNormalizeNullableFields<T>, "InputObject">>) {
         this.builder.inputType<ImplementableInputObjectRef<Types, T>, InputFieldsFromShape<Types, RecursivelyNormalizeNullableFields<T>, "InputObject">>(this, options);
-        return this as InputObjectRef<Types, T>;
->>>>>>> 6f53ee9c (Add builder and SchemaTypes to field and type refs)
+        return this as InputObjectRef<Types, RecursivelyNormalizeNullableFields<T>>;
     }
 }

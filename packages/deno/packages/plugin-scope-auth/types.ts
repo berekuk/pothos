@@ -8,6 +8,7 @@ export interface ScopeAuthPluginOptions<Types extends SchemaTypes> {
     runScopesOnType?: boolean;
     treatErrorsAsUnauthorized?: boolean;
     authorizeOnSubscribe?: boolean;
+    defaultStrategy?: "all" | "any";
     authScopes: ScopeAuthInitializer<Types>;
 }
 export interface BuiltInScopes<Types extends SchemaTypes> {

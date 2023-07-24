@@ -191,13 +191,8 @@ proto.addGraphQLEnum = function addGraphQLEnum<Shape extends string | number>(ty
     } as never);
     return ref;
 };
-<<<<<<< HEAD
 proto.addGraphQLInput = function addGraphQLInput<Shape extends {}>(type: GraphQLInputObjectType, { name = type.name, fields, extensions, ...options }: AddGraphQLInputTypeOptions<SchemaTypes, Shape>) {
     const ref = this.inputRef<never>(name);
-=======
-proto.addGraphQLInput = function addGraphQLInput<Shape extends {}>(type: GraphQLInputObjectType, { name = type.name, fields, extensions, ...options }: AddGraphQLInputTypeOptions<SchemaTypes, Shape>): PothosSchemaTypes.InputObjectRef<SchemaTypes, Shape> {
-    const ref = this.inputRef<Shape>(name);
->>>>>>> 6d6a3d23 (Refactor refs so configs and fields are stored on refs)
     return ref.implement({
         ...options,
         description: type.description ?? undefined,

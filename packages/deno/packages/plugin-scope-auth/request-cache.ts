@@ -17,11 +17,13 @@ export default class RequestCache<Types extends SchemaTypes> {
     scopes?: MaybePromise<ScopeLoaderMap<Types>>;
     cacheKey?: (value: unknown) => unknown;
     treatErrorsAsUnauthorized: boolean;
+    defaultStrategy: "all" | "any";
     constructor(builder: PothosSchemaTypes.SchemaBuilder<Types>, context: Types["Context"]) {
         this.builder = builder;
         this.context = context;
         this.cacheKey = builder.options.scopeAuth?.cacheKey;
         this.treatErrorsAsUnauthorized = builder.options.scopeAuth?.treatErrorsAsUnauthorized ?? false;
+        this.defaultStrategy = builder.options.scopeAuth?.defaultStrategy ?? "any";
     }
     static fromContext<T extends SchemaTypes>(context: T["Context"], builder: PothosSchemaTypes.SchemaBuilder<T>): RequestCache<T> {
         if (!requestCache.has(context)) {
@@ -208,7 +210,7 @@ export default class RequestCache<Types extends SchemaTypes> {
             }
         }
         if ($any) {
-            const anyResult = this.evaluateScopeMap($any, info);
+            const anyResult = this.evaluateScopeMap($any, info, false);
             if (isThenable(anyResult)) {
                 promises.push(anyResult);
             }
@@ -277,7 +279,7 @@ export default class RequestCache<Types extends SchemaTypes> {
             return val;
         }
     }
-    evaluateScopeMap(map: AuthScopeMap<Types> | boolean, info?: GraphQLResolveInfo, forAll = false): MaybePromise<null | AuthFailure> {
+    evaluateScopeMap(map: AuthScopeMap<Types> | boolean, info?: GraphQLResolveInfo, forAll = this.defaultStrategy === "all"): MaybePromise<null | AuthFailure> {
         if (typeof map === "boolean") {
             return map
                 ? null
